@@ -10,17 +10,22 @@ def select_encoder(encoder = ""):
     encoderInstance = encoder
     return encoderInstance
 
-""" Input:  dataset: List of string that indicates dataset to be used.
-            selected_encoder: String that indicates clustering method instance.
+""" Input:  encoder: Encoder instance.
+            dataset: List of string that indicates dataset to be used.
+            save: Indicates whether to save the features as a file or not.
     Output: Array of predictions.
 
     Function that instantiates the whole model and generates the predictions."""
-def generate_features(dataset=None, selected_encoder=""):
+def generate_features(encoder, dataset=None, save=False):
     if dataset is None:
         dataset = ["a"]
 
-    features = []
-    encoder = select_encoder(selected_encoder)
+    features = encoder(dataset)
+
+    # Save features to data.results
+    if save:
+        features.to_csv("data/results/features.csv", index=False)
+
     return features
 
 if __name__=="__main__":

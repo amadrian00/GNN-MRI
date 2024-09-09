@@ -13,6 +13,8 @@ import clustering.clustering as cl
     Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
 def predict(encoder, cluster, gnn):
     predictions = []
+    features = bF.generate_features(encoder)
+    clusters = cl.generate_clusters(cluster, features)
     return predictions
 
 """ Input:  selected_encoder: String that indicates encoder.
