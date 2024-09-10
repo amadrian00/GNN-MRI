@@ -15,10 +15,7 @@ def get_dataset(dataset_name):
         print(f" {'\033[31m'} Error: The dataset '{dataset_path}' does not exist.")
         sys.exit(1)  # Exit the script with a non-zero status indicating an error
 
-    dataset = generate_dataset(dataset_name, dataset_path)
-
-    dataset = 0
-    #dataset = open(dataset_path)
+    dataset = generate_dataset(dataset_path)
     return dataset
 
 """ Input:  dataset: Dataset instance.
@@ -30,14 +27,14 @@ def add_clusters(dataset, clusters):
     dataset.append(clusters)
     return dataset
 
-""" Input:  dataset_name: List of string that indicates dataset to be used.
-            dataset_path: Path to the dataset directory.
+""" Input:  dataset_path: Path to the dataset directory.
     Output: Dataset ready to enter the pipeline.
 
     Function that returns the dataset."""
-def generate_dataset(dataset_name, dataset_path):
+def generate_dataset(dataset_path):
     metadata = pd.read_csv(dataset_path+'/metadata.csv', usecols=["Subject", "Sex","Age"])
-    print(metadata)
+
+    return metadata
 
 if __name__=="__main__":
     exit(0)
