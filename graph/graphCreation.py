@@ -2,7 +2,7 @@
 Adrián Ayuso Muñoz 2024-09-06 for the GNN-MRI project.
 """
 
-""" Input: /.
+""" Input:  /.
     Output: List of nodes.
 
     Function that opens the datasets and creates a list of nodes."""
@@ -11,7 +11,7 @@ def create_nodes():
     return nodes
 
 
-""" Input: /.
+""" Input:  /.
     Output: List of edges.
 
     Function that opens the datasets and creates a list of edges."""
