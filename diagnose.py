@@ -5,18 +5,6 @@ import brainFeatures.brainFeatures as bF
 import graphNeuralNetworks.graphNeuralNetworks as gNN
 import clustering.clustering as cl
 
-""" Input:  encoder: Encoder instance.
-            cluster: Clustering method instance.
-            gnn: GNN instance.
-    Output: Array of predictions.
-
-    Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
-def predict(encoder, cluster, gnn):
-    predictions = []
-    features = bF.generate_features(encoder)
-    clusters = cl.generate_clusters(cluster, features)
-    return predictions
-
 """ Input:  selected_encoder: String that indicates encoder.
             selected_cluster: String that indicates clustering method instance.
             selected_gnn: String that indicates GNN instance.
@@ -30,6 +18,18 @@ def diagnose(selected_encoder, selected_cluster, selected_gnn):
 
     # diagnose and return predictions
     predictions = predict(encoder, cluster, gnn)
+
+""" Input:  encoder: Encoder instance.
+            cluster: Clustering method instance.
+            gnn: GNN instance.
+    Output: Array of predictions.
+
+    Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
+def predict(encoder, cluster, gnn):
+    predictions = []
+    features = bF.generate_features(encoder)
+    clusters = cl.generate_clusters(cluster, features)
+    return predictions
 
 if __name__=="__main__":
     string_selected_encoder = ""
