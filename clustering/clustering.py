@@ -3,7 +3,7 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 
 """ Input:  cluster: Clustering method instance.
-            features: Array of features.
+            features: Array of features to generate clusters.
             save: Indicates whether to save the features as a file or not.
     Output: Array of predictions.
 

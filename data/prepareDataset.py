@@ -11,6 +11,15 @@ def get_dataset(dataset_name):
     dataset = open(dataset_path)
     return dataset
 
+""" Input:  dataset: Dataset instance.
+            clusters: Assigned clusters.
+    Output: Dataset instance.
+
+    Function that appends the assigned cluster to each element."""
+def add_clusters(dataset, clusters):
+    dataset.append(clusters)
+    return dataset
+
 """ Input:  dataset_name: List of string that indicates dataset to be used.
     Output: Dataset path.
 
