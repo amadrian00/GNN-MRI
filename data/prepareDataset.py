@@ -9,18 +9,19 @@ class DataSet:
     def __init__(self,dataset_name):
         self.dataset_name = dataset_name
         self.dataset = None
+        self.dataset_path = './data/datasets/' + self.dataset_name
 
     """ Input:  -
         Output: Dataset instance.
     
         Function that prepares and returns the dataset."""
     def get_dataset(self):
-        dataset_path = './data/datasets/' + self.dataset_name
-        if not os.path.isdir(dataset_path):
-            print(f" {'\033[31m'} Error: The dataset '{dataset_path}' does not exist.")
+
+        if not os.path.isdir(self.dataset_path):
+            print(f" {'\033[31m'} Error: The dataset '{self.dataset_path}' does not exist.")
             sys.exit(1)  # Exit the script with a non-zero status indicating an error
 
-        self.dataset = self.generate_dataset(dataset_path)
+        self.dataset = self.generate_dataset(self.dataset_path)
         return self.dataset
 
     """ Input:  dataset: Dataset instance.
