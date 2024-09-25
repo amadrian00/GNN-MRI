@@ -4,6 +4,10 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 import os
 import sys
 import pandas as pd
+import numpy as np
+
+# Set future behavior for downcasting
+pd.set_option('future.no_silent_downcasting', True)
 
 class DataSet:
     def __init__(self,dataset_name):
@@ -43,39 +47,74 @@ class DataSet:
         dataset_and_labels = pd.read_csv(dataset_path + '/metadata.csv')
         return dataset_and_labels
 
-
-
 class DallasDataSet(DataSet):
     def __init__(self, dataset_name):
         DataSet.__init__(self,dataset_name)
+
+        self.root_dir = 'data/datasets/ds004856/surveys/'
+        self.physical_health_dir = self.root_dir + 'Template8_Physical_Health.xlsx'
+        self.mental_health_dir =  self.root_dir + 'Template9_Mental_Health.xlsx'
+        self.psychosocial_health_dir =  self.root_dir + 'Template10_Psychosocial.xlsx'
+        self.participants_path = 'data/datasets/ds004856/participants.tsv'
 
     """ Input:  dataset_path: String that indicates root path to dataset
         Output: Dataset ready to enter the pipeline.
 
         Function that returns the dataset with the labels."""
-    @staticmethod
-    def generate_dataset(dataset_path):
-        dataset_and_labels = pd.read_csv(dataset_path + '/metadata.csv', usecols=["Subject", "Sex", "Age"])
-        return dataset_and_labels
+    def generate_dataset(self, save=False):
+        physical_health, mental_health, _ = self.excel_to_pandas()
 
-    def old_to_clean(self):
-        drop = ['ConstructName','ConstructNumber','Wave','HasData','NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
-        physical_health = self.open_join_excel('data/datasets/ds004856/surveys/Template8_Physical_Health.xlsx', drop)
-        physical_health.to_csv('data/datasets/ds004856/surveys/clean_physical_health.csv')
+        participants = self.load_clean_participants(self.participants_path, save)
+        physical_health = self.load_clean_physical(self.root_dir,physical_health, save)
+        mental_health = self.load_clean_mental(self.root_dir, mental_health, save)
 
-        drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData', 'NumTasks', 'Asses36', 'Asses37', 'Asses38']
-        mental_health = self.open_join_excel('data/datasets/ds004856/surveys/Template9_Mental_Health.xlsx', drop)
-        mental_health.to_csv('data/datasets/ds004856/surveys/clean_mental_health.csv')
+        data = pd.concat([participants, physical_health, mental_health], axis=1)
 
-        drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData', 'NumAssess', 'Assess39', 'Assess40', 'Assess41',
-                'Assess42', 'Assess42', 'Assess43', 'Assess44', 'Assess45', 'Assess46', 'Assess47', 'Assess48', 'Assess49'
-                , 'Assess50', 'Assess51']
-        psychosocial_health = self.open_join_excel('data/datasets/ds004856/surveys/Template10_Psychosocial.xlsx', drop)
-        psychosocial_health.to_csv('data/datasets/ds004856/surveys/clean_psychosocial.csv')
+        w1 = data[['AgeMRI_W1', 'Sex', 'Sys1', 'Dia1', 'CESDepression1', 'Alzheimer1']]
+        w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2']]
+        w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3']]
+
+        for w in [w1, w2, w3]:
+            w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer']
+
+        dataset = pd.concat([w1, w2, w3], axis=0)
+
+        dataset['Participant'] = dataset.index
+        dataset = dataset.dropna(subset=['Age'])
+        dataset = dataset.reset_index(drop=True)
+
+        dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
+
+        dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer']]
+
+        if save:
+            dataset.to_csv(self.root_dir + 'dataset.csv')
+
+        return dataset
+
+    def excel_to_pandas(self, save=False):
+        common_drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData']
+
+        drop = common_drop + ['NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
+        physical_health = self.open_join_excel(self.physical_health_dir, drop)
+
+        drop = common_drop + [ 'NumTasks', 'Asses36', 'Asses37', 'Asses38']
+        mental_health = self.open_join_excel(self.mental_health_dir, drop)
+
+
+        drop = common_drop + ['NumAssess', 'Assess39', 'Assess40', 'Assess41', 'Assess42', 'Assess42', 'Assess43',
+                              'Assess44', 'Assess45', 'Assess46', 'Assess47', 'Assess48', 'Assess49', 'Assess50', 'Assess51']
+        psychosocial_health = self.open_join_excel(self.psychosocial_health_dir, drop)
+
+        if save:
+            mental_health.to_csv(self.root_dir + 'clean_mental_health.csv')
+            physical_health.to_csv(self.root_dir + 'clean_physical_health.csv')
+            psychosocial_health.to_csv(self.root_dir + 'clean_psychosocial.csv')
 
         return physical_health, mental_health, psychosocial_health
 
-    def open_join_excel(self, excel_file, drop_columns):
+    @staticmethod
+    def open_join_excel(excel_file, drop_columns):
         excel = pd.read_excel(excel_file, index_col = 0, sheet_name=None)
         merged = pd.DataFrame()
         index = 1
@@ -92,9 +131,23 @@ class DallasDataSet(DataSet):
             index+=1
         return merged
 
-    def load_clean_physical(self):
-        keep_columns = ['S#',
-                   'BPDay1Time1Sys341', 'BPDay1Time1Sys342', 'BPDay1Time1Sys343',
+    @staticmethod
+    def load_clean_participants(participants_path, save=False):
+        keep_columns = ['participant_id', 'AgeMRI_W1', 'AgeMRI_W2', 'AgeMRI_W3', 'Sex']
+
+        participants_clean = pd.read_csv(participants_path, sep='\t', index_col=0, usecols=keep_columns)
+        participants_clean.index = participants_clean.index.str.replace(r'sub-(\d+)', r'\1', regex=True)
+
+        participants_clean.index = participants_clean.index.astype(int)
+        participants_clean.sort_index(inplace=True)
+
+        if save: participants_clean.to_csv(participants_path)
+
+        return participants_clean
+
+    @staticmethod
+    def load_clean_physical(root_dir, physical_health, save=False):
+        keep_columns = np.array(['BPDay1Time1Sys341', 'BPDay1Time1Sys342', 'BPDay1Time1Sys343',
                    'BPDay1Time1Dia341', 'BPDay1Time1Dia342', 'BPDay1Time1Dia343',
                    'BPDay1Time2Sys341', 'BPDay1Time2Sys342', 'BPDay1Time2Sys343',
                    'BPDay1Time2Dia341', 'BPDay1Time2Dia342', 'BPDay1Time2Dia343',
@@ -102,82 +155,37 @@ class DallasDataSet(DataSet):
                    'BPDay2Time1Sys341', 'BPDay2Time1Sys342', 'BPDay2Time1Sys343',
                    'BPDay2Time1Dia341', 'BPDay2Time1Dia342', 'BPDay2Time1Dia343',
                    'BPDay2Time2Sys341', 'BPDay2Time2Sys342', 'BPDay2Time2Sys343',
-                   'BPDay2Time2Dia341', 'BPDay2Time2Dia342', 'BPDay2Time2Dia343']
+                   'BPDay2Time2Dia341', 'BPDay2Time2Dia342', 'BPDay2Time2Dia343'])
 
-        physical_health = pd.read_csv('data/datasets/ds004856/surveys/clean_physical_health.csv',
-                                            index_col=0, usecols=keep_columns)
+        physical_health = physical_health[keep_columns]
 
-        physical_health_sys1 = physical_health[['BPDay1Time1Sys341', 'BPDay1Time2Sys341', 'BPDay2Time1Sys341', 'BPDay2Time2Sys341']].mean(axis=1)
-        physical_health_sys2 = physical_health[['BPDay1Time1Sys342', 'BPDay1Time2Sys342', 'BPDay2Time1Sys342', 'BPDay2Time2Sys342']].mean(axis=1)
-        physical_health_sys3 = physical_health[['BPDay1Time1Sys343', 'BPDay1Time2Sys343', 'BPDay2Time1Sys343', 'BPDay2Time2Sys343']].mean(axis=1)
+        sys1 = physical_health[keep_columns[[0,6,12,18]]].mean(axis=1)
+        sys2 = physical_health[keep_columns[[1,7,13,19]]].mean(axis=1)
+        sys3 = physical_health[keep_columns[[2,8,14,20]]].mean(axis=1)
 
-        physical_health_dia1 = physical_health[['BPDay1Time1Dia341', 'BPDay1Time2Dia341', 'BPDay2Time1Dia341', 'BPDay2Time2Dia341']].mean(axis=1)
-        physical_health_dia2 = physical_health[['BPDay1Time1Dia342', 'BPDay1Time2Dia342', 'BPDay2Time1Dia342', 'BPDay2Time2Dia342']].mean(axis=1)
-        physical_health_dia3 = physical_health[['BPDay1Time1Dia343', 'BPDay1Time2Dia343', 'BPDay2Time1Dia343', 'BPDay2Time2Dia343']].mean(axis=1)
+        dia1 = physical_health[keep_columns[[3,9,15,21]]].mean(axis=1)
+        dia2 = physical_health[keep_columns[[4,10,16,22]]].mean(axis=1)
+        dia3 = physical_health[keep_columns[[5,11,17,23]]].mean(axis=1)
 
-        physical_health =  pd.concat([physical_health_sys1, physical_health_dia1, physical_health_sys2, physical_health_dia2,
-                                    physical_health_sys3, physical_health_dia3 ], axis=1)
+        physical_health =  pd.concat([sys1, dia1, sys2, dia2, sys3, dia3 ], axis=1)
 
         physical_health.columns = ['Sys1', 'Dia1', 'Sys2', 'Dia2', 'Sys3', 'Dia3']
 
-        physical_health.to_csv('data/datasets/ds004856/surveys/physical_features.csv')
+        if save: physical_health.to_csv(root_dir + 'physical_features.csv')
 
         return physical_health
 
-    def load_clean_mental(self):
-        keep_columns = ['S#',
-                   'CESDTot371', 'CESDTot372', 'CESDTot373',
-                   'ADASTot381', 'ADASTot382', 'ADASTot383']
+    @staticmethod
+    def load_clean_mental(root_dir, mental_health, save=False):
+        keep_columns = np.array(['CESDTot371', 'CESDTot372', 'CESDTot373', 'ADASTot381', 'ADASTot382', 'ADASTot383'])
 
-        mental_health = pd.read_csv('data/datasets/ds004856/surveys/clean_mental_health.csv',
-                                            index_col=0, usecols=keep_columns)
-        mental_health2 = pd.read_csv('data/datasets/ds004856/surveys/clean_mental_health.csv',
-                                            index_col=0, usecols=keep_columns)
+        mental_health = mental_health[keep_columns]
 
-        for wave in ['CESDTot371', 'CESDTot372', 'CESDTot373']:
-            mental_health2[wave] = (mental_health[wave] >= 16).astype(int)
+        mental_health.loc[:, keep_columns[0:3]] = np.where(mental_health.loc[:, keep_columns[0:3]] >= 16, 1, 0)
+        mental_health.loc[:, keep_columns[3:6]] = np.where(mental_health.loc[:, keep_columns[3:6]] >= 10, 1, 0)
 
-        for wave in ['ADASTot381', 'ADASTot382', 'ADASTot383']:
-            mental_health2[wave] = (mental_health[wave] >= 10).astype(int)
+        mental_health.columns = ['CESDepression1', 'CESDepression2', 'CESDepression3', 'Alzheimer1', 'Alzheimer2', 'Alzheimer3']
 
-        mental_health.columns = ['CESDepression1', 'CESDepression2', 'CESDepression3',
-                                    'Alzheimer1', 'Alzheimer2', 'Alzheimer3']
-
-        mental_health.to_csv('data/datasets/ds004856/surveys/mental_features.csv')
+        if save: mental_health.to_csv(root_dir + 'mental_features.csv')
 
         return mental_health
-
-    def load_clean_participants(self):
-        cols = ['participant_id', 'AgeMRI_W1', 'AgeMRI_W2', 'AgeMRI_W3', 'Sex']
-        participants_clean = pd.read_csv('data/datasets/ds004856/participants.tsv', sep='\t', index_col=0, usecols=cols)
-        participants_clean.index = participants_clean.index.str.replace(r'sub-(\d+)', r'\1', regex=True)
-        participants_clean.to_csv('data/datasets/ds004856/surveys/participants.csv')
-
-    def join_patients_data(self):
-        physical_health_clean = pd.read_csv('data/datasets/ds004856/surveys/physical_features.csv', index_col=0)
-        mental_health_clean = pd.read_csv('data/datasets/ds004856/surveys/mental_features.csv', index_col=0)
-        participants = pd.read_csv('data/datasets/ds004856/surveys/participants.csv', index_col=0)
-        participants_data = pd.concat([participants, physical_health_clean, mental_health_clean], axis=1)
-
-        w1 = participants_data[['AgeMRI_W1','Sex','Sys1','Dia1','CESDepression1','Alzheimer1']]
-        w2 = participants_data[['AgeMRI_W2','Sex','Sys2','Dia2','CESDepression2','Alzheimer2']]
-        w3 = participants_data[['AgeMRI_W3','Sex','Sys3','Dia3','CESDepression3','Alzheimer3']]
-
-        for w in [w1, w2, w3]:
-            w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer']
-
-        participants_data_sep = pd.concat([w1, w2, w3], axis=0)
-
-        participants_data_sep['Participant'] = participants_data_sep.index
-        participants_data_sep = participants_data_sep.dropna(subset=['Age'])
-        participants_data_sep = participants_data_sep.reset_index(drop=True)
-
-        participants_data_sep['Sex'] = participants_data_sep['Sex'].replace({'f': 0, 'm': 1}).astype(int)
-
-        participants_data_sep = participants_data_sep[['Participant','Age','Sex','Sys','Dia','CESDepression','Alzheimer']]
-
-        participants_data_sep.to_csv('data/datasets/ds004856/surveys/dataset.csv')
-
-
-if __name__=="__main__":
-    exit(0)
