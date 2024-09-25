@@ -52,9 +52,9 @@ class DallasDataSet(DataSet):
         DataSet.__init__(self,dataset_name)
 
         self.root_dir = 'data/datasets/ds004856/surveys/'
-        self.physical_health_dir = self.root_dir + 'Template8_Physical_Health.xlsx'
-        self.mental_health_dir =  self.root_dir + 'Template9_Mental_Health.xlsx'
-        self.psychosocial_health_dir =  self.root_dir + 'Template10_Psychosocial.xlsx'
+        self.physical_health_path = self.root_dir + 'Template8_Physical_Health.xlsx'
+        self.mental_health_path =  self.root_dir + 'Template9_Mental_Health.xlsx'
+        self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
         self.participants_path = 'data/datasets/ds004856/participants.tsv'
 
     """ Input:  dataset_path: String that indicates root path to dataset
@@ -64,7 +64,7 @@ class DallasDataSet(DataSet):
     def generate_dataset(self, save=False):
         physical_health, mental_health, _ = self.excel_to_pandas()
 
-        participants = self.load_clean_participants(self.participants_path, save)
+        participants = self.load_clean_participants(self.root_dir, self.participants_path, save)
         physical_health = self.load_clean_physical(self.root_dir,physical_health, save)
         mental_health = self.load_clean_mental(self.root_dir, mental_health, save)
 
@@ -92,19 +92,23 @@ class DallasDataSet(DataSet):
 
         return dataset
 
+    """ Input:  save: Boolean that indicates whether to save the dataset.
+        Output: Pandas datasets without redundant information.
+
+        Function that returns the three cleaned files."""
     def excel_to_pandas(self, save=False):
         common_drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData']
 
         drop = common_drop + ['NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
-        physical_health = self.open_join_excel(self.physical_health_dir, drop)
+        physical_health = self.open_join_excel(self.physical_health_path, drop)
 
         drop = common_drop + [ 'NumTasks', 'Asses36', 'Asses37', 'Asses38']
-        mental_health = self.open_join_excel(self.mental_health_dir, drop)
+        mental_health = self.open_join_excel(self.mental_health_path, drop)
 
 
         drop = common_drop + ['NumAssess', 'Assess39', 'Assess40', 'Assess41', 'Assess42', 'Assess42', 'Assess43',
                               'Assess44', 'Assess45', 'Assess46', 'Assess47', 'Assess48', 'Assess49', 'Assess50', 'Assess51']
-        psychosocial_health = self.open_join_excel(self.psychosocial_health_dir, drop)
+        psychosocial_health = self.open_join_excel(self.psychosocial_health_path, drop)
 
         if save:
             mental_health.to_csv(self.root_dir + 'clean_mental_health.csv')
@@ -113,9 +117,14 @@ class DallasDataSet(DataSet):
 
         return physical_health, mental_health, psychosocial_health
 
+    """ Input:  excel_file_path: String that indicates the path to the excel file.
+                drop_columns: List of the columns' names to drop.
+        Output: Pandas dataframe with Excel data dropping all rows without information.
+
+        Function that joins the pages of a given Dataset."""
     @staticmethod
-    def open_join_excel(excel_file, drop_columns):
-        excel = pd.read_excel(excel_file, index_col = 0, sheet_name=None)
+    def open_join_excel(excel_file_path, drop_columns):
+        excel = pd.read_excel(excel_file_path, index_col = 0, sheet_name=None)
         merged = pd.DataFrame()
         index = 1
         for sheet in excel:
@@ -131,8 +140,14 @@ class DallasDataSet(DataSet):
             index+=1
         return merged
 
+    """ Input:  root_dir: String to the root dir of the data files.
+                participants_path: String that indicates the path to the participants file.
+                save: Boolean that indicates whether to save the dataset.
+        Output: Pandas dataframe with participants information.
+
+        Function prepares and returns the patients prepared Dataset."""
     @staticmethod
-    def load_clean_participants(participants_path, save=False):
+    def load_clean_participants(root_dir, participants_path, save=False):
         keep_columns = ['participant_id', 'AgeMRI_W1', 'AgeMRI_W2', 'AgeMRI_W3', 'Sex']
 
         participants_clean = pd.read_csv(participants_path, sep='\t', index_col=0, usecols=keep_columns)
@@ -141,10 +156,16 @@ class DallasDataSet(DataSet):
         participants_clean.index = participants_clean.index.astype(int)
         participants_clean.sort_index(inplace=True)
 
-        if save: participants_clean.to_csv(participants_path)
+        if save: participants_clean.to_csv(root_dir + 'participants.csv')
 
         return participants_clean
 
+    """ Input:  root_dir: String to the root dir of the data files.
+                physical_health: Dataset of the physical health characteristics.
+                save: Boolean that indicates whether to save the dataset.
+        Output: Pandas dataframe with the physical health patients' information.
+
+        Function prepares and returns the physical health patients' prepared Dataset."""
     @staticmethod
     def load_clean_physical(root_dir, physical_health, save=False):
         keep_columns = np.array(['BPDay1Time1Sys341', 'BPDay1Time1Sys342', 'BPDay1Time1Sys343',
@@ -175,6 +196,12 @@ class DallasDataSet(DataSet):
 
         return physical_health
 
+    """ Input:  root_dir: String to the root dir of the data files.
+                mental_health: Dataset of the mental health characteristics.
+                save: Boolean that indicates whether to save the dataset.
+        Output: Pandas dataframe with the mental health patients' information.
+
+        Function prepares and returns the mental health patients' prepared Dataset."""
     @staticmethod
     def load_clean_mental(root_dir, mental_health, save=False):
         keep_columns = np.array(['CESDTot371', 'CESDTot372', 'CESDTot373', 'ADASTot381', 'ADASTot382', 'ADASTot383'])
