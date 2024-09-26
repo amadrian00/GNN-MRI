@@ -29,12 +29,12 @@ class BrainEncoder:
         Function that instantiates the desired encoder."""
     @staticmethod
     def select_encoder(encoder_name =""):
-        encoderInstance = None
+        encoder_instance = None
 
         if encoder_name == 'Nifti':
-            encoderInstance = NiftiMasker(smoothing_fwhm=5, memory='nilearn_cache', memory_level=1)
+            encoder_instance = NiftiMasker(smoothing_fwhm=5, memory='nilearn_cache', memory_level=1)
 
-        return encoderInstance
+        return encoder_instance
 
 if __name__=="__main__":
     exit(0)
