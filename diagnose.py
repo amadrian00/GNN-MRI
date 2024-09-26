@@ -6,44 +6,48 @@ import graphNeuralNetworks.graphNeuralNetworks as gNN
 import clustering.clustering as cl
 import data.prepareDataset as pD
 
-""" Input:  selected_encoder: String that indicates encoder.
-            selected_cluster: String that indicates clustering method instance.
-            selected_gnn: String that indicates GNN instance.
-            to_predict: Data to which predictions should be generated.
-    Output: Array of predictions.
+class Diagnosis:
+    def __init__(self, selected_encoder, selected_cluster, selected_gnn):
+        self.encoder = bE.BrainEncoder(selected_encoder)
+        self.cluster = cl.Cluster(selected_cluster)
+        self.gnn = gNN.GraphNN(selected_gnn)
 
-    Function that instantiates the whole model and generates the predictions."""
-def diagnose(selected_encoder, selected_cluster, selected_gnn, to_predict):
-    encoder = bE.select_encoder(selected_encoder)
-    cluster = cl.select_cluster(selected_cluster)
-    gnn = gNN.select_gnn(selected_gnn)
+    """ Input:  to_predict: Data to which predictions should be generated.
+                save: Boolean that indicates whether or not to save the intermediate results.
+        Output: Array of predictions.
+    
+        Function that instantiates the whole model and generates the predictions."""
+    def diagnose(self, to_predict, save=False):
+        # diagnose and return predictions
+        predictions = self.predict(self.encoder, self.cluster, self.gnn, to_predict, save)
+        return predictions
 
-    # diagnose and return predictions
-    predictions = predict(encoder, cluster, gnn, to_predict)
-    return predictions
+    """ Input:  encoder: Encoder instance.
+                cluster: Clustering method instance.
+                gnn: GNN instance.
+                to_predict: Data to which predictions should be generated.
+                save: Boolean that indicates whether or not to save the intermediate results.
+        Output: Array of predictions.
+    
+        Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
+    @staticmethod
+    def predict(encoder, cluster, gnn, to_predict, save):
+        features = encoder.generate_features(to_predict)
+        clusters = cluster.generate_clusters(cluster, features)
 
-""" Input:  encoder: Encoder instance.
-            cluster: Clustering method instance.
-            gnn: GNN instance.
-            to_predict: Data to which predictions should be generated.
-    Output: Array of predictions.
+        if save: clusters.to_csv()
 
-    Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
-def predict(encoder, cluster, gnn, to_predict):
-    features = bE.generate_features(encoder, to_predict)
-    clusters = cl.generate_clusters(cluster, features)
-
-    to_predict = pD.add_clusters(to_predict, clusters)
-
-    predictions = gNN.predict_edges(gnn, to_predict)
-    return predictions
+        predictions = gnn.predict_edges(to_predict)
+        return predictions
 
 if __name__=="__main__":
     string_selected_encoder = ""
     string_selected_cluster = ""
     string_selected_gnn = ""
     string_selected_dataset = ""
-    selected_dataset = pD.get_dataset(string_selected_dataset)
+    selected_dataset = pD.DallasDataSet("Dallas DataSet").generate_dataset()
 
-    diagnose(string_selected_encoder, string_selected_cluster, string_selected_gnn, selected_dataset)
+    diagnosis = Diagnosis(string_selected_encoder, string_selected_cluster, string_selected_gnn)
+
+    diagnosis.diagnose(selected_dataset)
     exit(0)

@@ -225,13 +225,12 @@ class DallasDataSet(DataSet):
 
     """ Input:  root_dir: String to the root dir of the data files.
                 paths: PandasDataframe to contain the file paths.
-                force_update: Boolean that indicates whether or not to update the paths dataset even if it exists.
                 save: Boolean that indicates whether to save the dataset.
         Output: Array containing the Strings of the fMRI paths.
     
         Function that returns the path to the fMRI files."""
     @staticmethod
-    def get_fmri_path(root_dir, paths, force_update=False, save=False):
+    def get_fmri_path(root_dir, paths, save=False):
         for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
             file_dir = str(subdir.parent)
             wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
