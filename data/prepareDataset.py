@@ -133,9 +133,9 @@ class DallasDataSet(DataSet):
         index = 1
         for sheet in excel:
             sheet = excel[sheet]
-            missingData = sheet.index[sheet['HasData'] == 2].tolist()
+            missing_data = sheet.index[sheet['HasData'] == 2].tolist()
 
-            sheet = sheet.drop(index=missingData)
+            sheet = sheet.drop(index=missing_data)
             sheet = sheet.drop(columns=drop_columns)
 
             sheet = sheet.add_suffix(str(index), 'columns')
