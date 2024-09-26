@@ -59,7 +59,7 @@ class DallasDataSet(DataSet):
         self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
         self.participants_path = 'data/datasets/ds004856/participants.tsv'
 
-        self.paths = pd.DataFrame(columns=['Patient', 'Wave', 'Path'])
+        self.paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
 
     """ Input:  dataset_path: String that indicates root path to dataset
         Output: Dataset ready to enter the pipeline.
@@ -71,15 +71,17 @@ class DallasDataSet(DataSet):
         participants = self.load_clean_participants(self.root_dir, self.participants_path, save)
         physical_health = self.load_clean_physical(self.root_dir,physical_health, save)
         mental_health = self.load_clean_mental(self.root_dir, mental_health, save)
+        fmri_paths = self.get_fmri_path(self.root_dir, self.paths)
 
-        data = pd.concat([participants, physical_health, mental_health], axis=1)
+        data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
 
-        w1 = data[['AgeMRI_W1', 'Sex', 'Sys1', 'Dia1', 'CESDepression1', 'Alzheimer1']]
-        w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2']]
-        w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3']]
+
+        w1 = data[['AgeMRI_W1', 'Sex', 'Sys1', 'Dia1', 'CESDepression1', 'Alzheimer1', 'Wave1']]
+        w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2', 'Wave2']]
+        w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3', 'Wave3']]
 
         for w in [w1, w2, w3]:
-            w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer']
+            w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
 
         dataset = pd.concat([w1, w2, w3], axis=0)
 
@@ -89,7 +91,7 @@ class DallasDataSet(DataSet):
 
         dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
 
-        dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer']]
+        dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
         if save:
             dataset.to_csv(self.root_dir + 'dataset.csv')
@@ -221,28 +223,38 @@ class DallasDataSet(DataSet):
 
         return mental_health
 
-    """ Input:  force_update: Boolean that indicates whether or not to update the paths dataset even if it exists.
+    """ Input:  root_dir: String to the root dir of the data files.
+                paths: PandasDataframe to contain the file paths.
+                force_update: Boolean that indicates whether or not to update the paths dataset even if it exists.
+                save: Boolean that indicates whether to save the dataset.
         Output: Array containing the Strings of the fMRI paths.
     
         Function that returns the path to the fMRI files."""
-    def get_fmri_path(self, force_update=False):
-        if len(self.paths) == 0 or force_update:
-            self.paths = pd.DataFrame(columns=['Patient', 'Wave', 'Path'])
-            for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
-                file_dir = str(subdir.parent)
-                wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
-                patient = re.search(r'sub-(\d+)', file_dir).group(1)
+    @staticmethod
+    def get_fmri_path(root_dir, paths, force_update=False, save=False):
+        for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
+            file_dir = str(subdir.parent)
+            wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
+            patient = re.search(r'sub-(\d+)', file_dir).group(1)
 
-                file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
-                file = []
-                if len(file_path) > 0:
-                    file.append(file_dir + file_path[0].name)
-                    if len(file_path) > 1:
-                        file.append(file_dir + file_path[1].name)
+            file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
+            file = ''
+            if len(file_path) > 0:
+                file = (file_dir + file_path[-1].name) #If 2 runs for the same wave just get the last.
 
-                self.paths.loc[len(self.paths)] = [patient, wave, file]
+            if paths['Patient'].eq(patient).any():
+                paths.loc[paths['Patient'] == patient, 'Wave'+wave] = file
+            else:
+                paths.loc[len(paths), ['Patient','Wave'+wave]] = [patient, file]
 
-        print(self.paths)
+        paths.set_index('Patient', inplace=True)
+        paths.index = paths.index.astype(int)
+        paths.index.name = 'S#'
+        paths.sort_index(inplace=True)
+
+        if save: paths.to_csv(root_dir + 'fmri_paths.csv')
+
+        return paths
 
 
 
