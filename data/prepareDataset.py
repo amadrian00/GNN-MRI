@@ -2,9 +2,11 @@
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import os
+import re
 import sys
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 # Set future behavior for downcasting
 pd.set_option('future.no_silent_downcasting', True)
@@ -56,6 +58,8 @@ class DallasDataSet(DataSet):
         self.mental_health_path =  self.root_dir + 'Template9_Mental_Health.xlsx'
         self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
         self.participants_path = 'data/datasets/ds004856/participants.tsv'
+
+        self.paths = pd.DataFrame(columns=['Patient', 'Wave', 'Path'])
 
     """ Input:  dataset_path: String that indicates root path to dataset
         Output: Dataset ready to enter the pipeline.
@@ -216,3 +220,30 @@ class DallasDataSet(DataSet):
         if save: mental_health.to_csv(root_dir + 'mental_features.csv')
 
         return mental_health
+
+    """ Input:  force_update: Boolean that indicates whether or not to update the paths dataset even if it exists.
+        Output: Array containing the Strings of the fMRI paths.
+    
+        Function that returns the path to the fMRI files."""
+    def get_fmri_path(self, force_update=False):
+        if len(self.paths) == 0 or force_update:
+            self.paths = pd.DataFrame(columns=['Patient', 'Wave', 'Path'])
+            for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
+                file_dir = str(subdir.parent)
+                wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
+                patient = re.search(r'sub-(\d+)', file_dir).group(1)
+
+                file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
+                file = []
+                if len(file_path) > 0:
+                    file.append(file_dir + file_path[0].name)
+                    if len(file_path) > 1:
+                        file.append(file_dir + file_path[1].name)
+
+                self.paths.loc[len(self.paths)] = [patient, wave, file]
+
+        print(self.paths)
+
+
+
+

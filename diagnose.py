@@ -1,7 +1,7 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
-import brainFeatures.brainFeatures as bF
+import brainEncoder.brainEncoder as bE
 import graphNeuralNetworks.graphNeuralNetworks as gNN
 import clustering.clustering as cl
 import data.prepareDataset as pD
@@ -14,7 +14,7 @@ import data.prepareDataset as pD
 
     Function that instantiates the whole model and generates the predictions."""
 def diagnose(selected_encoder, selected_cluster, selected_gnn, to_predict):
-    encoder = bF.select_encoder(selected_encoder)
+    encoder = bE.select_encoder(selected_encoder)
     cluster = cl.select_cluster(selected_cluster)
     gnn = gNN.select_gnn(selected_gnn)
 
@@ -30,7 +30,7 @@ def diagnose(selected_encoder, selected_cluster, selected_gnn, to_predict):
 
     Function that generates predictions for the data given the desired encoder, clustering method and gnn layer."""
 def predict(encoder, cluster, gnn, to_predict):
-    features = bF.generate_features(encoder, to_predict)
+    features = bE.generate_features(encoder, to_predict)
     clusters = cl.generate_clusters(cluster, features)
 
     to_predict = pD.add_clusters(to_predict, clusters)
