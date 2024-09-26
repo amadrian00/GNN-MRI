@@ -22,8 +22,8 @@ def generate_clusters(cluster, features, save=False):
 
     Function that instantiates the desired clustering method."""
 def select_cluster(cluster = ""):
-    cluster_instance = cluster
-    return cluster_instance
+    clusterInstance = cluster
+    return clusterInstance
 
 if __name__=="__main__":
     exit(0)

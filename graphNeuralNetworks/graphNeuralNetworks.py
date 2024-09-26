@@ -9,10 +9,10 @@ import graphCreation as gC
 
     Function that instantiates the desired gnn layer."""
 def predict_edges(gnn, dataset):
-    gnn_instance = select_gnn(gnn)
+    gnnInstance = select_gnn(gnn)
     graph = gC.create_graph(dataset)
 
-    return gnn_instance, graph
+    return gnnInstance, graph
     #return gnnInstance(graph)
 
 """ Input:  gnn: String indicating selection of gnn layer.
@@ -20,8 +20,8 @@ def predict_edges(gnn, dataset):
 
     Function that instantiates the desired gnn layer."""
 def select_gnn(gnn = ""):
-    gnn_instance = gnn
-    return gnn_instance
+    gnnInstance = gnn
+    return gnnInstance
 
 if __name__=="__main__":
     exit(0)
