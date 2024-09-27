@@ -1,7 +1,7 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
-class Cluster:
+class ClusterFinder:
     def __init__(self, cluster):
         self.cluster = cluster
 
