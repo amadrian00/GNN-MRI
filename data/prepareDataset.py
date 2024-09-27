@@ -4,8 +4,8 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 import os
 import re
 import sys
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pathlib import Path
 
 # Set future behavior for downcasting
