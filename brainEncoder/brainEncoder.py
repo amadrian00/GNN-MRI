@@ -18,8 +18,7 @@ class BrainEncoder:
         print(self.features)
         print(self.features.shape)
 
-        if save:
-            self.features.to_csv("data/results/features.csv", index=False)
+        if save: self.features.to_csv("data/results/features.csv", index=False)
 
         return self.features
 
