@@ -1,7 +1,7 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
-import graphCreation as gC
+from . import graphCreation as gC
 
 class GraphNN:
     def __init__(self, gnn):
