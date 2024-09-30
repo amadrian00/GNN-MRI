@@ -1,12 +1,13 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
-from nilearn.input_data import NiftiMasker
+from . import autoEncoder
 
 class BrainEncoder:
-    def __init__(self, encoder_name):
-        self.encoder = self.select_encoder(encoder_name)
+    def __init__(self, dataset, encoder_name='AutoEncoder'):
+        self.encoder = self._select_encoder(encoder_name, dataset[0].shape)
         self.features = None
+        self.dataset = dataset
 
     """ Input:  dataset: Data to generate predictions.
                 save: Indicates whether to save the features as a file or not.
@@ -22,18 +23,23 @@ class BrainEncoder:
 
         return self.features
 
-    """ Input:  encoder_name: String indicating selection of encoder layer.
+    """ Input:  dims: Integer indicating the dimensions of the data.
+                encoder_name: String indicating selection of encoder layer.
         Output: Encoder instance.
     
         Function that instantiates the desired encoder."""
     @staticmethod
-    def select_encoder(encoder_name =""):
+    def _select_encoder(dims, encoder_name):
         encoder_instance = None
 
-        if encoder_name == 'Nifti':
-            encoder_instance = NiftiMasker(smoothing_fwhm=5, memory='nilearn_cache', memory_level=1)
+        if encoder_name == 'AutoEncoder':
+            encoder_instance = autoEncoder.AE(dims)
 
         return encoder_instance
+
+    def train(self):
+        self.encoder.training(self.dataset)
+
 
 if __name__=="__main__":
     exit(0)
