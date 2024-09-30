@@ -7,8 +7,8 @@ import brainEncoder.brainEncoder as bE
 import graphNeuralNetworks.graphNN as gNN
 
 class DiagnoseTool:
-    def __init__(self, selected_encoder, selected_cluster, selected_gnn):
-        self.encoder = bE.BrainEncoder(selected_encoder)
+    def __init__(self, selected_encoder, selected_cluster, selected_gnn, dataset_path):
+        self.encoder = bE.BrainEncoder(selected_encoder, dataset_path)
         self.cluster = cF.ClusterFinder(selected_cluster)
         self.gnn = gNN.GraphNN(selected_gnn)
 
@@ -17,7 +17,7 @@ class DiagnoseTool:
         Output: Array of predictions.
     
         Function that generates predictions for the data given the dataset."""
-    def predict(self, to_predict, save):
+    def predict(self, to_predict, save=False):
         features = self.encoder.generate_features(to_predict)
         clusters = self.cluster.generate_clusters(features)
 
@@ -31,9 +31,12 @@ if __name__=="__main__":
     string_selected_cluster = ""
     string_selected_gnn = ""
     string_selected_dataset = ""
-    selected_dataset_paths = pD.DallasDataSet("Dallas DataSet").generate_dataset()['rfMRI'].values
 
-    diagnosis = DiagnoseTool(string_selected_encoder, string_selected_cluster, string_selected_gnn)
+    dataset = pD.DallasDataSet("Dallas DataSet")
+    selected_dataset_paths = dataset.generate_dataset()['rfMRI'].values
+    print(selected_dataset_paths)
 
+    diagnosis = DiagnoseTool(string_selected_encoder, string_selected_cluster, string_selected_gnn, selected_dataset_paths)
     diagnosis.predict(selected_dataset_paths)
+
     exit(0)
