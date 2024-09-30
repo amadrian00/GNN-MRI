@@ -3,7 +3,6 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import os
 import re
-import sys
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -17,18 +16,13 @@ class DataSet:
         self.dataset_path = './data/datasets/' + self.dataset_name
         self.dataset = None
 
-    """ Input:  -
-        Output: Dataset instance.
-    
-        Function that prepares and returns the dataset."""
-    def get_dataset(self):
+    """ Input:  dataset_path: String that indicates root path to dataset
+        Output: Dataset ready to enter the pipeline.
 
-        if not os.path.isdir(self.dataset_path):
-            print(f" {'\033[31m'} Error: The dataset '{self.dataset_path}' does not exist.")
-            sys.exit(1)  # Exit the script with a non-zero status indicating an error
-
-        self.dataset = self.generate_dataset(self.dataset_path)
-        return self.dataset
+        Function that returns the dataset with the labels."""
+    def generate_dataset(self, dataset_path):
+        dataset_and_labels = pd.read_csv(dataset_path + '/metadata.csv')
+        return dataset_and_labels
 
     """ Input:  dataset: Dataset instance.
                 clusters: Assigned clusters.
@@ -39,15 +33,6 @@ class DataSet:
     def add_clusters(dataset, clusters):
         dataset.append(clusters)
         return dataset
-
-    """ Input:  dataset_path: String that indicates root path to dataset
-        Output: Dataset ready to enter the pipeline.
-
-        Function that returns the dataset with the labels."""
-    @staticmethod
-    def generate_dataset(dataset_path):
-        dataset_and_labels = pd.read_csv(dataset_path + '/metadata.csv')
-        return dataset_and_labels
 
 class DallasDataSet(DataSet):
     def __init__(self, dataset_name):
@@ -61,40 +46,45 @@ class DallasDataSet(DataSet):
 
         self.paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
 
-    """ Input:  dataset_path: String that indicates root path to dataset
+    """ Input:  save: Boolean that indicates whether to save the dataset.
+                force_update: Boolean that indicates whether to force update the dataset if it exists.
         Output: Dataset ready to enter the pipeline.
 
         Function that returns the dataset with the labels."""
-    def generate_dataset(self, save=False):
-        physical_health, mental_health, _ = self.excel_to_pandas()
+    def generate_dataset(self, save=False, force_update=False):
+        if os.path.isfile(self.root_dir + 'dataset.csv') and not force_update:
+            dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
 
-        participants = self.load_clean_participants(self.root_dir, self.participants_path, save)
-        physical_health = self.load_clean_physical(self.root_dir,physical_health, save)
-        mental_health = self.load_clean_mental(self.root_dir, mental_health, save)
-        fmri_paths = self.get_fmri_path(self.root_dir, self.paths)
+        else:
+            physical_health, mental_health, _ = self._excel_to_pandas(save)
 
-        data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
+            participants = self._load_clean_participants(self.root_dir, self.participants_path, save)
+            physical_health = self._load_clean_physical(self.root_dir,physical_health, save)
+            mental_health = self._load_clean_mental(self.root_dir, mental_health, save)
+            fmri_paths = self._get_fmri_path(self.root_dir, self.paths, save)
+
+            data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
 
 
-        w1 = data[['AgeMRI_W1', 'Sex', 'Sys1', 'Dia1', 'CESDepression1', 'Alzheimer1', 'Wave1']]
-        w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2', 'Wave2']]
-        w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3', 'Wave3']]
+            w1 = data[['AgeMRI_W1', 'Sex', 'Sys1', 'Dia1', 'CESDepression1', 'Alzheimer1', 'Wave1']]
+            w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2', 'Wave2']]
+            w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3', 'Wave3']]
 
-        for w in [w1, w2, w3]:
-            w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
+            for w in [w1, w2, w3]:
+                w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
 
-        dataset = pd.concat([w1, w2, w3], axis=0)
+            dataset = pd.concat([w1, w2, w3], axis=0)
 
-        dataset['Participant'] = dataset.index
-        dataset = dataset.dropna(subset=['Age'])
-        dataset = dataset.reset_index(drop=True)
+            dataset['Participant'] = dataset.index
+            dataset = dataset.dropna(subset=['Age'])
+            dataset = dataset.reset_index(drop=True)
 
-        dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
+            dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
 
-        dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
+            dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
-        if save:
-            dataset.to_csv(self.root_dir + 'dataset.csv')
+            if save:
+                dataset.to_csv(self.root_dir + 'dataset.csv')
 
         return dataset
 
@@ -102,19 +92,19 @@ class DallasDataSet(DataSet):
         Output: Pandas datasets without redundant information.
 
         Function that returns the three cleaned files."""
-    def excel_to_pandas(self, save=False):
+    def _excel_to_pandas(self, save=False):
         common_drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData']
 
         drop = common_drop + ['NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
-        physical_health = self.open_join_excel(self.physical_health_path, drop)
+        physical_health = self._open_join_excel(self.physical_health_path, drop)
 
         drop = common_drop + [ 'NumTasks', 'Asses36', 'Asses37', 'Asses38']
-        mental_health = self.open_join_excel(self.mental_health_path, drop)
+        mental_health = self._open_join_excel(self.mental_health_path, drop)
 
 
         drop = common_drop + ['NumAssess', 'Assess39', 'Assess40', 'Assess41', 'Assess42', 'Assess42', 'Assess43',
                               'Assess44', 'Assess45', 'Assess46', 'Assess47', 'Assess48', 'Assess49', 'Assess50', 'Assess51']
-        psychosocial_health = self.open_join_excel(self.psychosocial_health_path, drop)
+        psychosocial_health = self._open_join_excel(self.psychosocial_health_path, drop)
 
         if save:
             mental_health.to_csv(self.root_dir + 'clean_mental_health.csv')
@@ -129,7 +119,7 @@ class DallasDataSet(DataSet):
 
         Function that joins the pages of a given Dataset."""
     @staticmethod
-    def open_join_excel(excel_file_path, drop_columns):
+    def _open_join_excel(excel_file_path, drop_columns):
         excel = pd.read_excel(excel_file_path, index_col = 0, sheet_name=None)
         merged = pd.DataFrame()
         index = 1
@@ -153,7 +143,7 @@ class DallasDataSet(DataSet):
 
         Function prepares and returns the patients prepared Dataset."""
     @staticmethod
-    def load_clean_participants(root_dir, participants_path, save=False):
+    def _load_clean_participants(root_dir, participants_path, save=False):
         keep_columns = ['participant_id', 'AgeMRI_W1', 'AgeMRI_W2', 'AgeMRI_W3', 'Sex']
 
         participants_clean = pd.read_csv(participants_path, sep='\t', index_col=0, usecols=keep_columns)
@@ -173,7 +163,7 @@ class DallasDataSet(DataSet):
 
         Function prepares and returns the physical health patients' prepared Dataset."""
     @staticmethod
-    def load_clean_physical(root_dir, physical_health, save=False):
+    def _load_clean_physical(root_dir, physical_health, save=False):
         keep_columns = np.array(['BPDay1Time1Sys341', 'BPDay1Time1Sys342', 'BPDay1Time1Sys343',
                    'BPDay1Time1Dia341', 'BPDay1Time1Dia342', 'BPDay1Time1Dia343',
                    'BPDay1Time2Sys341', 'BPDay1Time2Sys342', 'BPDay1Time2Sys343',
@@ -209,7 +199,7 @@ class DallasDataSet(DataSet):
 
         Function prepares and returns the mental health patients' prepared Dataset."""
     @staticmethod
-    def load_clean_mental(root_dir, mental_health, save=False):
+    def _load_clean_mental(root_dir, mental_health, save=False):
         keep_columns = np.array(['CESDTot371', 'CESDTot372', 'CESDTot373', 'ADASTot381', 'ADASTot382', 'ADASTot383'])
 
         mental_health = mental_health[keep_columns]
@@ -230,16 +220,16 @@ class DallasDataSet(DataSet):
     
         Function that returns the path to the fMRI files."""
     @staticmethod
-    def get_fmri_path(root_dir, paths, save=False):
+    def _get_fmri_path(root_dir, paths, save=False):
         for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
             file_dir = str(subdir.parent)
             wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
             patient = re.search(r'sub-(\d+)', file_dir).group(1)
 
             file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
-            file = ''
+            file = None
             if len(file_path) > 0:
-                file = (file_dir + file_path[-1].name) #If 2 runs for the same wave just get the last.
+                file = (file_dir + '/func/' + file_path[-1].name) #If 2 runs for the same wave just get the last.
 
             if paths['Patient'].eq(patient).any():
                 paths.loc[paths['Patient'] == patient, 'Wave'+wave] = file
