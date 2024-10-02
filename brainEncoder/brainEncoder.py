@@ -4,10 +4,9 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 from . import autoEncoder
 
 class BrainEncoder:
-    def __init__(self, dataset, encoder_name='AutoEncoder'):
-        self.encoder = self._select_encoder(encoder_name, dataset[0].shape)
+    def __init__(self, in_channels, encoder_name='AutoEncoder'):
+        self.encoder = self._select_encoder(encoder_name, in_channels)
         self.features = None
-        self.dataset = dataset
 
     """ Input:  dataset: Data to generate predictions.
                 save: Indicates whether to save the features as a file or not.
@@ -23,22 +22,22 @@ class BrainEncoder:
 
         return self.features
 
-    """ Input:  dims: Integer indicating the dimensions of the data.
-                encoder_name: String indicating selection of encoder layer.
+    """ Input:  encoder_name: String indicating selection of encoder layer.
+                in_channels: Integer indicating the input channel for the encoder layer.
         Output: Encoder instance.
     
         Function that instantiates the desired encoder."""
     @staticmethod
-    def _select_encoder(dims, encoder_name):
+    def _select_encoder(encoder_name, in_channels):
         encoder_instance = None
 
         if encoder_name == 'AutoEncoder':
-            encoder_instance = autoEncoder.AE(dims)
+            encoder_instance = autoEncoder.AE(in_channels)
 
         return encoder_instance
 
-    def train(self):
-        self.encoder.training(self.dataset)
+    def train(self, data_loader, batch_size):
+        self.encoder.placeholder_train(data_loader, batch_size)
 
 
 if __name__=="__main__":

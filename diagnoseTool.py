@@ -8,7 +8,8 @@ import graphNeuralNetworks.graphNN as gNN
 
 class DiagnoseTool:
     def __init__(self, selected_encoder, selected_cluster, selected_gnn, dataset_path):
-        self.encoder = bE.BrainEncoder(selected_encoder, dataset_path)
+        in_channels = 0
+        self.encoder = bE.BrainEncoder(in_channels, selected_encoder)
         self.cluster = cF.ClusterFinder(selected_cluster)
         self.gnn = gNN.GraphNN(selected_gnn)
 
