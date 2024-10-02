@@ -3,48 +3,27 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import os
 import re
+import torch
 import numpy as np
 import pandas as pd
+import nibabel as nib
 from pathlib import Path
+from nilearn.image import clean_img
+from torch.utils.data import Dataset
+
 
 # Set future behavior for downcasting
 pd.set_option('future.no_silent_downcasting', True)
 
-class DataSet:
-    def __init__(self,dataset_name):
-        self.dataset_name = dataset_name
-        self.dataset_path = './data/datasets/' + self.dataset_name
-        self.dataset = None
-
-    """ Input:  dataset_path: String that indicates root path to dataset
-        Output: Dataset ready to enter the pipeline.
-
-        Function that returns the dataset with the labels."""
-    def generate_dataset(self, dataset_path):
-        dataset_and_labels = pd.read_csv(dataset_path + '/metadata.csv')
-        return dataset_and_labels
-
-    """ Input:  dataset: Dataset instance.
-                clusters: Assigned clusters.
-        Output: Dataset instance.
-    
-        Function that appends the assigned cluster to each element."""
-    @staticmethod
-    def add_clusters(dataset, clusters):
-        dataset.append(clusters)
-        return dataset
-
-class DallasDataSet(DataSet):
-    def __init__(self, dataset_name):
-        DataSet.__init__(self,dataset_name)
-
+class DallasDataSet(Dataset):
+    def __init__(self):
         self.root_dir = 'data/datasets/ds004856/surveys/'
         self.physical_health_path = self.root_dir + 'Template8_Physical_Health.xlsx'
         self.mental_health_path =  self.root_dir + 'Template9_Mental_Health.xlsx'
         self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
         self.participants_path = 'data/datasets/ds004856/participants.tsv'
-
-        self.paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
+        self.dataset = None
+        self.dataset_fmri = None
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
                 force_update: Boolean that indicates whether to force update the dataset if it exists.
@@ -53,7 +32,7 @@ class DallasDataSet(DataSet):
         Function that returns the dataset with the labels."""
     def generate_dataset(self, save=False, force_update=False):
         if os.path.isfile(self.root_dir + 'dataset.csv') and not force_update:
-            dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
+            self.dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
 
         else:
             physical_health, mental_health, _ = self._excel_to_pandas(save)
@@ -61,7 +40,7 @@ class DallasDataSet(DataSet):
             participants = self._load_clean_participants(self.root_dir, self.participants_path, save)
             physical_health = self._load_clean_physical(self.root_dir,physical_health, save)
             mental_health = self._load_clean_mental(self.root_dir, mental_health, save)
-            fmri_paths = self._get_fmri_path(self.root_dir, self.paths, save)
+            fmri_paths = self._get_fmri_path(self.root_dir, save)
 
             data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
 
@@ -73,20 +52,22 @@ class DallasDataSet(DataSet):
             for w in [w1, w2, w3]:
                 w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
 
-            dataset = pd.concat([w1, w2, w3], axis=0)
+            self.dataset = pd.concat([w1, w2, w3], axis=0)
 
-            dataset['Participant'] = dataset.index
-            dataset = dataset.dropna(subset=['Age'])
-            dataset = dataset.reset_index(drop=True)
+            self.dataset['Participant'] = self.dataset.index
+            self.dataset = self.dataset.dropna(subset=['Age'])
+            self.dataset = self.dataset.dropna(subset=['rfMRI'])
+            self.dataset = self.dataset.reset_index(drop=True)
 
-            dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
+            self.dataset['Sex'] = self.dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
 
-            dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
+            self.dataset = self.dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
             if save:
-                dataset.to_csv(self.root_dir + 'dataset.csv')
+                self.dataset.to_csv(self.root_dir + 'dataset.csv')
 
-        return dataset
+        self.dataset_fmri = np.array(list(map(nib.load, self.dataset['rfMRI'].values)))
+        return self.dataset
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
         Output: Pandas datasets without redundant information.
@@ -220,7 +201,8 @@ class DallasDataSet(DataSet):
     
         Function that returns the path to the fMRI files."""
     @staticmethod
-    def _get_fmri_path(root_dir, paths, save=False):
+    def _get_fmri_path(root_dir, save=False):
+        paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
         for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
             file_dir = str(subdir.parent)
             wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
@@ -229,7 +211,7 @@ class DallasDataSet(DataSet):
             file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
             file = None
             if len(file_path) > 0:
-                file = (file_dir + '/func/' + file_path[-1].name) #If 2 runs for the same wave just get the last.
+                file = (file_dir + '\\func\\' + file_path[-1].name) #If 2 runs for the same wave just get the last.
 
             if paths['Patient'].eq(patient).any():
                 paths.loc[paths['Patient'] == patient, 'Wave'+wave] = file
@@ -245,6 +227,20 @@ class DallasDataSet(DataSet):
 
         return paths
 
+    """ Input:  dataset: Dataset instance.
+                clusters: Assigned clusters.
+        Output: Dataset instance.
 
+        Function that appends the assigned cluster to each element."""
+    @staticmethod
+    def add_clusters(dataset, clusters):
+        dataset.append(clusters)
+        return dataset
+
+    def __getitem__(self, idx):
+        return torch.tensor(clean_img(self.dataset_fmri[idx]).get_fdata()[:, :, :, :154], dtype=torch.float32).permute(3, 2, 0, 1)
+
+    def __len__(self):
+        return len(self.dataset_fmri)
 
 
