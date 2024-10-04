@@ -72,9 +72,7 @@ class AE(torch.nn.Module):
 
         Function that encodes and decodes the given input."""
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        return self.decoder(self.encoder(x))
 
     """ Input:  x: Instance of data to process by the model.
         Output: Model code (intermediate result) for the given input.
