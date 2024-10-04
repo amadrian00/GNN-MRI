@@ -11,20 +11,13 @@ from pathlib import Path
 from nilearn.image import clean_img
 from torch.utils.data import Dataset
 
-
 # Set future behavior for downcasting
 pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
-    def __init__(self,save=False, force_update=False):
-        self.root_dir = 'data/datasets/ds004856/surveys/'
-        self.physical_health_path = self.root_dir + 'Template8_Physical_Health.xlsx'
-        self.mental_health_path =  self.root_dir + 'Template9_Mental_Health.xlsx'
-        self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
-        self.participants_path = 'data/datasets/ds004856/participants.tsv'
-
-        self.dataframe = self.generate_dataset(save,force_update)
-        self.fmri_data = self.dataframe['rfMRI']
+    def __init__(self,root_dir, save=False, force_update=False):
+        self.dataframe = self.generate_dataset(root_dir, save,force_update)
+        self.fmri_data = self.dataframe['rfMRI'].values
 
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
@@ -32,17 +25,17 @@ class DallasDataSet(Dataset):
         Output: PandasDataframe containing the dataset.
         
         Function that returns the dataset with the labels."""
-    def generate_dataset(self, save=False, force_update=False):
-        if os.path.isfile(self.root_dir + 'dataset.csv') and not force_update:
-            dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
+    def generate_dataset(self, root_dir, save, force_update):
+        if os.path.isfile(root_dir + 'dataset.csv') and not force_update:
+            dataset = pd.read_csv(root_dir + 'dataset.csv', index_col=0)
 
         else:
-            physical_health, mental_health, _ = self._excel_to_pandas(save)
+            physical_health, mental_health, _ = self._excel_to_pandas(root_dir, save)
 
-            participants = self._load_clean_participants(self.root_dir, self.participants_path, save)
-            physical_health = self._load_clean_physical(self.root_dir,physical_health, save)
-            mental_health = self._load_clean_mental(self.root_dir, mental_health, save)
-            fmri_paths = self._get_fmri_path(self.root_dir, save)
+            participants = self._load_clean_participants(root_dir, 'data/datasets/ds004856/participants.tsv', save)
+            physical_health = self._load_clean_physical(root_dir,physical_health, save)
+            mental_health = self._load_clean_mental(root_dir, mental_health, save)
+            fmri_paths = self._get_fmri_path(root_dir, save)
 
             data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
 
@@ -66,7 +59,7 @@ class DallasDataSet(Dataset):
             dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
             if save:
-                dataset.to_csv(self.root_dir + 'dataset.csv')
+                dataset.to_csv(root_dir + 'dataset.csv')
 
         dataset['rfMRI'] = np.array(list(map(nib.load, dataset['rfMRI'].values)))
         return dataset
@@ -75,24 +68,24 @@ class DallasDataSet(Dataset):
         Output: Pandas datasets without redundant information.
 
         Function that returns the three cleaned files."""
-    def _excel_to_pandas(self, save=False):
+    def _excel_to_pandas(self,root_dir, save):
         common_drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData']
 
         drop = common_drop + ['NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
-        physical_health = self._open_join_excel(self.physical_health_path, drop)
+        physical_health = self._open_join_excel(root_dir + 'Template8_Physical_Health.xlsx', drop)
 
         drop = common_drop + [ 'NumTasks', 'Asses36', 'Asses37', 'Asses38']
-        mental_health = self._open_join_excel(self.mental_health_path, drop)
+        mental_health = self._open_join_excel(root_dir + 'Template9_Mental_Health.xlsx', drop)
 
 
         drop = common_drop + ['NumAssess', 'Assess39', 'Assess40', 'Assess41', 'Assess42', 'Assess42', 'Assess43',
                               'Assess44', 'Assess45', 'Assess46', 'Assess47', 'Assess48', 'Assess49', 'Assess50', 'Assess51']
-        psychosocial_health = self._open_join_excel(self.psychosocial_health_path, drop)
+        psychosocial_health = self._open_join_excel(root_dir + 'Template10_Psychosocial.xlsx', drop)
 
         if save:
-            mental_health.to_csv(self.root_dir + 'clean_mental_health.csv')
-            physical_health.to_csv(self.root_dir + 'clean_physical_health.csv')
-            psychosocial_health.to_csv(self.root_dir + 'clean_psychosocial.csv')
+            mental_health.to_csv(root_dir + 'clean_mental_health.csv')
+            physical_health.to_csv(root_dir + 'clean_physical_health.csv')
+            psychosocial_health.to_csv(root_dir + 'clean_psychosocial.csv')
 
         return physical_health, mental_health, psychosocial_health
 
