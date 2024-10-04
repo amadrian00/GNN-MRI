@@ -16,23 +16,25 @@ from torch.utils.data import Dataset
 pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
-    def __init__(self):
+    def __init__(self,save=False, force_update=False):
         self.root_dir = 'data/datasets/ds004856/surveys/'
         self.physical_health_path = self.root_dir + 'Template8_Physical_Health.xlsx'
         self.mental_health_path =  self.root_dir + 'Template9_Mental_Health.xlsx'
         self.psychosocial_health_path =  self.root_dir + 'Template10_Psychosocial.xlsx'
         self.participants_path = 'data/datasets/ds004856/participants.tsv'
-        self.dataset = None
-        self.dataset_fmri = None
+
+        self.dataframe = self.generate_dataset(save,force_update)
+        self.fmri_data = self.dataframe['rfMRI']
+
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
                 force_update: Boolean that indicates whether to force update the dataset if it exists.
-        Output: Dataset ready to enter the pipeline.
-
+        Output: PandasDataframe containing the dataset.
+        
         Function that returns the dataset with the labels."""
     def generate_dataset(self, save=False, force_update=False):
         if os.path.isfile(self.root_dir + 'dataset.csv') and not force_update:
-            self.dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
+            dataset = pd.read_csv(self.root_dir + 'dataset.csv', index_col=0)
 
         else:
             physical_health, mental_health, _ = self._excel_to_pandas(save)
@@ -52,22 +54,22 @@ class DallasDataSet(Dataset):
             for w in [w1, w2, w3]:
                 w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
 
-            self.dataset = pd.concat([w1, w2, w3], axis=0)
+            dataset = pd.concat([w1, w2, w3], axis=0)
 
-            self.dataset['Participant'] = self.dataset.index
-            self.dataset = self.dataset.dropna(subset=['Age'])
-            self.dataset = self.dataset.dropna(subset=['rfMRI'])
-            self.dataset = self.dataset.reset_index(drop=True)
+            dataset['Participant'] = dataset.index
+            dataset = dataset.dropna(subset=['Age'])
+            dataset = dataset.dropna(subset=['rfMRI'])
+            dataset = dataset.reset_index(drop=True)
 
-            self.dataset['Sex'] = self.dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
+            dataset['Sex'] = dataset['Sex'].replace({'f': 0, 'm': 1}).astype(int)
 
-            self.dataset = self.dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
+            dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
             if save:
-                self.dataset.to_csv(self.root_dir + 'dataset.csv')
+                dataset.to_csv(self.root_dir + 'dataset.csv')
 
-        self.dataset_fmri = np.array(list(map(nib.load, self.dataset['rfMRI'].values)))
-        return self.dataset
+        dataset['rfMRI'] = np.array(list(map(nib.load, dataset['rfMRI'].values)))
+        return dataset
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
         Output: Pandas datasets without redundant information.
@@ -241,13 +243,13 @@ class DallasDataSet(Dataset):
 
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
-        return torch.tensor(clean_img(self.dataset_fmri[idx]).get_fdata()[:, :, :, :154], dtype=torch.float32).permute(3, 2, 0, 1)
+        return torch.tensor(clean_img(self.fmri_data[idx]).get_fdata()[:, :, :, :154], dtype=torch.float32).permute(3, 2, 0, 1)
 
     """ Input:  
         Output: Length of the dataset.
 
         Function that returns the length of the dataset."""
     def __len__(self):
-        return len(self.dataset_fmri)
+        return len(self.fmri_data)
 
 
