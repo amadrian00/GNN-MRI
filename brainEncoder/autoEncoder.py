@@ -45,6 +45,12 @@ class AE(torch.nn.Module):
             torch.nn.ReLU()
         )
 
+    """ Input:  input_shape: Array indicating the input dimensions of the data.
+                conv_layers: Tuple indicating the kernel dimensions of each convolution layer.
+                pool_layers: Tuple indicating the kernel dimensions of each pool layer.
+        Output: Array indicating the output dimensions of the data.
+
+        Function that calculates the output dimensions of the model."""
     @staticmethod
     def _calculate_encoded_shape(input_shape, conv_layers, pool_layers):
         d, h, w = input_shape[1], input_shape[2], input_shape[3]
@@ -61,15 +67,27 @@ class AE(torch.nn.Module):
 
         return d, h, w
 
+    """ Input:  x: Instance of data to process by the model.
+        Output: Model result for the given input.
+
+        Function that encodes and decodes the given input."""
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
 
+    """ Input:  x: Instance of data to process by the model.
+        Output: Model code (intermediate result) for the given input.
+
+        Function that encodes the given input."""
     def encode(self, x):
         return self.encoder(x)
 
-    def placeholder_train(self, data_loader, batch_size):
+    """ Input:  data_loader: Instance of data to train the model.
+                batch_size: Integer indicating the batch size.
+        Output: -
+        Function that trains the model with the given data."""
+    def train_loop(self, data_loader, batch_size):
         self.train()
 
         loss_function = torch.nn.MSELoss()
@@ -79,7 +97,7 @@ class AE(torch.nn.Module):
 
         epochs = 20
         for epoch in range(epochs):
-            i = 1
+            i = 0
             for batch in data_loader:
                 batch_reconstructed = self(batch)
 
@@ -93,7 +111,7 @@ class AE(torch.nn.Module):
                 loss.backward()
                 optimizer.step()
 
-                print(f"Epoch: {epoch} {'':<20} Batch Start Index: {i} {'':<20} Loss: {loss:.4f}")
+                print(f"Epoch: {epoch} {'':<20} Batch Start Index: {i*batch_size} {'':<20} Loss: {loss:.4f}")
                 i+=1
 
                 # Storing the losses in a list for plotting

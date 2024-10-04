@@ -9,7 +9,7 @@ class BrainEncoder:
         self.features = None
 
     """ Input:  dataset: Data to generate predictions.
-                save: Indicates whether to save the features as a file or not.
+                save: Boolean that indicates whether to save the features as a file or not.
         Output: Array of predictions.
     
         Function that instantiates the whole model and generates the predictions."""
@@ -36,8 +36,13 @@ class BrainEncoder:
 
         return encoder_instance
 
+    """ Input:  data_loader: Dataloader instance.
+                batch_size: Integer indicating the batch size.
+        Output: -.
+
+        Function that trains the dataset. """
     def train(self, data_loader, batch_size):
-        self.encoder.placeholder_train(data_loader, batch_size)
+        self.encoder.train_loop(data_loader, batch_size)
 
 
 if __name__=="__main__":

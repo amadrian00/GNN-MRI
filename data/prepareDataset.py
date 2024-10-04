@@ -195,7 +195,6 @@ class DallasDataSet(Dataset):
         return mental_health
 
     """ Input:  root_dir: String to the root dir of the data files.
-                paths: PandasDataframe to contain the file paths.
                 save: Boolean that indicates whether to save the dataset.
         Output: Array containing the Strings of the fMRI paths.
     
@@ -237,9 +236,17 @@ class DallasDataSet(Dataset):
         dataset.append(clusters)
         return dataset
 
+    """ Input:  idx: Integer indicating the index of the item to get.
+        Output: Time of the dataset.
+
+        Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
         return torch.tensor(clean_img(self.dataset_fmri[idx]).get_fdata()[:, :, :, :154], dtype=torch.float32).permute(3, 2, 0, 1)
 
+    """ Input:  
+        Output: Length of the dataset.
+
+        Function that returns the length of the dataset."""
     def __len__(self):
         return len(self.dataset_fmri)
 
