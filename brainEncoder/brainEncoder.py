@@ -4,8 +4,8 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 from . import autoEncoder
 
 class BrainEncoder:
-    def __init__(self, in_channels, encoder_name='AutoEncoder'):
-        self.encoder = self._select_encoder(encoder_name, in_channels)
+    def __init__(self, available_device, in_channels, encoder_name='AutoEncoder'):
+        self.encoder = self._select_encoder(available_device, encoder_name, in_channels)
         self.features = None
 
     """ Input:  dataset: Data to generate predictions.
@@ -22,17 +22,18 @@ class BrainEncoder:
 
         return self.features
 
-    """ Input:  encoder_name: String indicating selection of encoder layer.
+    """ Input:  available_device: String indicating the available device for PyTorch.
+                encoder_name: String indicating selection of encoder layer.
                 in_channels: Integer indicating the input channel for the encoder layer.
         Output: Encoder instance.
     
         Function that instantiates the desired encoder."""
     @staticmethod
-    def _select_encoder(encoder_name, in_channels):
+    def _select_encoder(available_device, encoder_name, in_channels):
         encoder_instance = None
 
         if encoder_name == 'AutoEncoder':
-            encoder_instance = autoEncoder.AE(in_channels)
+            encoder_instance = autoEncoder.AE(available_device, in_channels)
 
         return encoder_instance
 

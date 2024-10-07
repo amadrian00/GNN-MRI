@@ -2,11 +2,14 @@
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import torch
+from gc import get_objects
 import matplotlib.pyplot as plt
+from collections import defaultdict
 
 class AE(torch.nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, available_device, in_channels):
         super().__init__()
+        self.available_device = available_device
         self.in_channels = in_channels
 
         self.conv1 = (3,1,1)
@@ -87,33 +90,45 @@ class AE(torch.nn.Module):
         Function that trains the model with the given data."""
     def train_loop(self, data_loader, batch_size):
         self.train()
+        self.to(self.available_device)
 
         loss_function = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-1, weight_decay=1e-8)
 
-        losses = []
+        before = defaultdict(int)
+        for i in get_objects():
+            before[type(i)] += 1
 
+        losses = []
         epochs = 20
         for epoch in range(epochs):
             i = 0
             for batch in data_loader:
-                batch_reconstructed = self(batch)
-
+                batch.to(self.available_device )
+                elements_reconstructed = self(batch)
                 # Calculating the loss function
-                loss = loss_function(batch_reconstructed, batch)
+                loss = loss_function(elements_reconstructed, batch)
 
-                # The gradients are set to zero,
-                # the gradient is computed and stored.
-                # .step() performs parameter update
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                print(f"Epoch: {epoch} {'':<20} Batch Start Index: {i*batch_size} {'':<20} Loss: {loss:.4f}")
-                i+=1
+                print(f"Epoch: {epoch} {'':<20} Batch Start Index: {i} {'':<20} Loss: {loss:.4f}")
+                i += batch_size
 
                 # Storing the losses in a list for plotting
-                losses.append(loss.item())  # Convert loss to a scalar
+                losses.append(loss.detach().item())
+
+                after =  defaultdict(int)
+
+                for j in get_objects():
+                    after[type(j)] += 1
+
+                reps = [(k, after[k] - before[k]) for k in after if after[k] - before[k]]
+                print (reps)
+                before = after
+
+        self.eval()
 
         # Defining the Plot Style
         plt.style.use('fivethirtyeight')
@@ -122,5 +137,3 @@ class AE(torch.nn.Module):
 
         # Plotting the last 100 values
         plt.plot(losses[-100:])
-
-        self.eval()

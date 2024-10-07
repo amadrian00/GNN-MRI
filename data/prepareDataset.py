@@ -15,10 +15,11 @@ from torch.utils.data import Dataset
 pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
-    def __init__(self,root_dir, save=False, force_update=False):
+    def __init__(self, available_device, save=False, force_update=False):
+        root_dir = 'data/datasets/ds004856/surveys/'
+        self.available_device = available_device
         self.dataframe = self.generate_dataset(root_dir, save,force_update)
         self.fmri_data = self.dataframe['rfMRI'].values
-
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
                 force_update: Boolean that indicates whether to force update the dataset if it exists.
@@ -236,7 +237,9 @@ class DallasDataSet(Dataset):
 
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
-        return torch.tensor(clean_img(self.fmri_data[idx]).get_fdata()[:, :, :, :154], dtype=torch.float32).permute(3, 2, 0, 1)
+        processed_img = clean_img(self.fmri_data[idx])
+        return torch.tensor(np.transpose(processed_img.get_fdata()[:, :, :, :154], [3,2,0,1]), dtype=torch.float32,
+                                device=self.available_device)
 
     """ Input:  
         Output: Length of the dataset.
@@ -244,5 +247,3 @@ class DallasDataSet(Dataset):
         Function that returns the length of the dataset."""
     def __len__(self):
         return len(self.fmri_data)
-
-
