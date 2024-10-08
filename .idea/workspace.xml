@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Add .idea and test (Remove in final version)">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/prepareDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/prepareDataset.py" afterDir="false" />
-    </list>
+    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Update workspace.xml" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -289,7 +286,7 @@
       <workItem from="1728350882992" duration="1991000" />
       <workItem from="1728352892761" duration="899000" />
       <workItem from="1728357518487" duration="13607000" />
-      <workItem from="1728373323985" duration="1928000" />
+      <workItem from="1728373323985" duration="2742000" />
     </task>
     <task id="LOCAL-00001" summary="Modify requirements.txt">
       <option name="closed" value="true" />
@@ -411,7 +408,23 @@
       <option name="project" value="LOCAL" />
       <updated>1728374722977</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Save files on separate folder for accessibility">
+      <option name="closed" value="true" />
+      <created>1728376033659</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1728376033659</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Update workspace.xml">
+      <option name="closed" value="true" />
+      <created>1728376065959</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1728376065959</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -442,7 +455,9 @@
     <MESSAGE value="Identified memory leakage" />
     <MESSAGE value="Minor update" />
     <MESSAGE value="Add .idea and test (Remove in final version)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add .idea and test (Remove in final version)" />
+    <MESSAGE value="Save files on separate folder for accessibility" />
+    <MESSAGE value="Update workspace.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update workspace.xml" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1728373428508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
