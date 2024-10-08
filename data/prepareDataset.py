@@ -16,27 +16,31 @@ pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
     def __init__(self, available_device, save=False, force_update=False):
-        root_dir = 'data/datasets/ds004856/surveys/'
+        root_dir = 'data/datasets/'
+
         self.available_device = available_device
-        self.dataframe = self.generate_dataset(root_dir, save,force_update)
+        self.dataframe = self.generate_dataset(root_dir+'ds004856/surveys/', root_dir+'ds004856_gen_files',
+                                               save, force_update)
         self.fmri_data = self.dataframe['rfMRI'].values
 
-    """ Input:  save: Boolean that indicates whether to save the dataset.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
+                save: Boolean that indicates whether to save the dataset.
                 force_update: Boolean that indicates whether to force update the dataset if it exists.
         Output: PandasDataframe containing the dataset.
         
         Function that returns the dataset with the labels."""
-    def generate_dataset(self, root_dir, save, force_update):
-        if os.path.isfile(root_dir + 'dataset.csv') and not force_update:
-            dataset = pd.read_csv(root_dir + 'dataset.csv', index_col=0)
+    def generate_dataset(self, root_dir, save_dir, save, force_update):
+        if os.path.isfile(save_dir + 'dataset.csv') and not force_update:
+            dataset = pd.read_csv(save_dir + 'dataset.csv', index_col=0)
 
         else:
-            physical_health, mental_health, _ = self._excel_to_pandas(root_dir, save)
+            physical_health, mental_health, _ = self._excel_to_pandas(root_dir, save_dir, save)
 
-            participants = self._load_clean_participants(root_dir, 'data/datasets/ds004856/participants.tsv', save)
-            physical_health = self._load_clean_physical(root_dir,physical_health, save)
-            mental_health = self._load_clean_mental(root_dir, mental_health, save)
-            fmri_paths = self._get_fmri_path(root_dir, save)
+            participants = self._load_clean_participants(root_dir, save_dir, 'data/datasets/ds004856/participants.tsv', save)
+            physical_health = self._load_clean_physical(root_dir, save_dir, physical_health, save)
+            mental_health = self._load_clean_mental(root_dir, save_dir, mental_health, save)
+            fmri_paths = self._get_fmri_path(root_dir, save_dir, save)
 
             data = pd.concat([participants, physical_health, mental_health, fmri_paths], axis=1)
 
@@ -60,16 +64,18 @@ class DallasDataSet(Dataset):
             dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
             if save:
-                dataset.to_csv(root_dir + 'dataset.csv')
+                dataset.to_csv(save_dir + 'dataset.csv')
 
-        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x).slicer[:,:,:,:154], dataset['rfMRI'].values)))
+        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x).slicer[:,:,:,:124], dataset['rfMRI'].values)))
         return dataset
 
-    """ Input:  save: Boolean that indicates whether to save the dataset.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
+                save: Boolean that indicates whether to save the dataset.
         Output: Pandas datasets without redundant information.
 
         Function that returns the three cleaned files."""
-    def _excel_to_pandas(self,root_dir, save):
+    def _excel_to_pandas(self,root_dir, save_dir, save):
         common_drop = ['ConstructName', 'ConstructNumber', 'Wave', 'HasData']
 
         drop = common_drop + ['NumAssess', 'Assess32', 'Assess33','Assess34', 'Assess35']
@@ -84,9 +90,9 @@ class DallasDataSet(Dataset):
         psychosocial_health = self._open_join_excel(root_dir + 'Template10_Psychosocial.xlsx', drop)
 
         if save:
-            mental_health.to_csv(root_dir + 'clean_mental_health.csv')
-            physical_health.to_csv(root_dir + 'clean_physical_health.csv')
-            psychosocial_health.to_csv(root_dir + 'clean_psychosocial.csv')
+            mental_health.to_csv(save_dir + 'clean_mental_health.csv')
+            physical_health.to_csv(save_dir + 'clean_physical_health.csv')
+            psychosocial_health.to_csv(save_dir + 'clean_psychosocial.csv')
 
         return physical_health, mental_health, psychosocial_health
 
@@ -113,14 +119,15 @@ class DallasDataSet(Dataset):
             index+=1
         return merged
 
-    """ Input:  root_dir: String to the root dir of the data files.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
                 participants_path: String that indicates the path to the participants file.
                 save: Boolean that indicates whether to save the dataset.
         Output: Pandas dataframe with participants information.
 
         Function prepares and returns the patients prepared Dataset."""
     @staticmethod
-    def _load_clean_participants(root_dir, participants_path, save=False):
+    def _load_clean_participants(root_dir, save_dir, participants_path, save=False):
         keep_columns = ['participant_id', 'AgeMRI_W1', 'AgeMRI_W2', 'AgeMRI_W3', 'Sex']
 
         participants_clean = pd.read_csv(participants_path, sep='\t', index_col=0, usecols=keep_columns)
@@ -129,18 +136,19 @@ class DallasDataSet(Dataset):
         participants_clean.index = participants_clean.index.astype(int)
         participants_clean.sort_index(inplace=True)
 
-        if save: participants_clean.to_csv(root_dir + 'participants.csv')
+        if save: participants_clean.to_csv(save_dir + 'participants.csv')
 
         return participants_clean
 
-    """ Input:  root_dir: String to the root dir of the data files.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
                 physical_health: Dataset of the physical health characteristics.
                 save: Boolean that indicates whether to save the dataset.
         Output: Pandas dataframe with the physical health patients' information.
 
         Function prepares and returns the physical health patients' prepared Dataset."""
     @staticmethod
-    def _load_clean_physical(root_dir, physical_health, save=False):
+    def _load_clean_physical(root_dir, save_dir, physical_health, save=False):
         keep_columns = np.array(['BPDay1Time1Sys341', 'BPDay1Time1Sys342', 'BPDay1Time1Sys343',
                    'BPDay1Time1Dia341', 'BPDay1Time1Dia342', 'BPDay1Time1Dia343',
                    'BPDay1Time2Sys341', 'BPDay1Time2Sys342', 'BPDay1Time2Sys343',
@@ -165,18 +173,19 @@ class DallasDataSet(Dataset):
 
         physical_health.columns = ['Sys1', 'Dia1', 'Sys2', 'Dia2', 'Sys3', 'Dia3']
 
-        if save: physical_health.to_csv(root_dir + 'physical_features.csv')
+        if save: physical_health.to_csv(save_dir + 'physical_features.csv')
 
         return physical_health
 
-    """ Input:  root_dir: String to the root dir of the data files.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
                 mental_health: Dataset of the mental health characteristics.
                 save: Boolean that indicates whether to save the dataset.
         Output: Pandas dataframe with the mental health patients' information.
 
         Function prepares and returns the mental health patients' prepared Dataset."""
     @staticmethod
-    def _load_clean_mental(root_dir, mental_health, save=False):
+    def _load_clean_mental(root_dir, save_dir, mental_health, save=False):
         keep_columns = np.array(['CESDTot371', 'CESDTot372', 'CESDTot373', 'ADASTot381', 'ADASTot382', 'ADASTot383'])
 
         mental_health = mental_health[keep_columns]
@@ -186,19 +195,20 @@ class DallasDataSet(Dataset):
 
         mental_health.columns = ['CESDepression1', 'CESDepression2', 'CESDepression3', 'Alzheimer1', 'Alzheimer2', 'Alzheimer3']
 
-        if save: mental_health.to_csv(root_dir + 'mental_features.csv')
+        if save: mental_health.to_csv(save_dir + 'mental_features.csv')
 
         return mental_health
 
-    """ Input:  root_dir: String to the root dir of the data files.
+    """ Input:  root_dir: String indicating the root directory where the dataset files are stored.
+                save_dir: String indicating the directory where the generated files are stored.
                 save: Boolean that indicates whether to save the dataset.
         Output: Array containing the Strings of the fMRI paths.
     
         Function that returns the path to the fMRI files."""
     @staticmethod
-    def _get_fmri_path(root_dir, save=False):
+    def _get_fmri_path(root_dir, save_dir, save=False):
         paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
-        for subdir in Path('data/datasets/ds004856').glob('sub-*/*/func'):
+        for subdir in Path(root_dir).glob('sub-*/*/func'):
             file_dir = str(subdir.parent)
             wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
             patient = re.search(r'sub-(\d+)', file_dir).group(1)
@@ -218,7 +228,7 @@ class DallasDataSet(Dataset):
         paths.index.name = 'S#'
         paths.sort_index(inplace=True)
 
-        if save: paths.to_csv(root_dir + 'fmri_paths.csv')
+        if save: paths.to_csv(save_dir + 'surveys/fmri_paths.csv')
 
         return paths
 
