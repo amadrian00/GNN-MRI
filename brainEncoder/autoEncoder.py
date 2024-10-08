@@ -9,7 +9,6 @@ from collections import defaultdict
 class AE(torch.nn.Module):
     def __init__(self, available_device, in_channels):
         super().__init__()
-        self.available_device = available_device
         self.in_channels = in_channels
 
         self.conv1 = (3,1,1)
@@ -47,6 +46,8 @@ class AE(torch.nn.Module):
                               mode='trilinear', align_corners=False),
             torch.nn.ReLU()
         )
+
+        self.to(available_device)
 
     """ Input:  input_shape: Array indicating the input dimensions of the data.
                 conv_layers: Tuple indicating the kernel dimensions of each convolution layer.
@@ -90,7 +91,6 @@ class AE(torch.nn.Module):
         Function that trains the model with the given data."""
     def train_loop(self, data_loader, batch_size):
         self.train()
-        self.to(self.available_device)
 
         loss_function = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-1, weight_decay=1e-8)

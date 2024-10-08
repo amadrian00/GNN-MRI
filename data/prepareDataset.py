@@ -62,7 +62,7 @@ class DallasDataSet(Dataset):
             if save:
                 dataset.to_csv(root_dir + 'dataset.csv')
 
-        dataset['rfMRI'] = np.array(list(map(nib.load, dataset['rfMRI'].values)))
+        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x).slicer[:,:,:,:154], dataset['rfMRI'].values)))
         return dataset
 
     """ Input:  save: Boolean that indicates whether to save the dataset.
@@ -238,7 +238,7 @@ class DallasDataSet(Dataset):
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
         processed_img = clean_img(self.fmri_data[idx])
-        return torch.tensor(np.transpose(processed_img.get_fdata()[:, :, :, :154], [3,2,0,1]), dtype=torch.float32,
+        return torch.tensor(np.transpose(processed_img.get_fdata(), [3,2,0,1]), dtype=torch.float32,
                                 device=self.available_device)
 
     """ Input:  
