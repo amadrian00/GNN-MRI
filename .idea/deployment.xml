@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" promptOnRemoteOverwrite="CHECK_TIMESTAMP" serverName="MiLab 5 SSH" remoteFilesAllowedToDisappearOnAutoupload="false" notifyRemoteChanges="true">
+    <serverData>
+      <paths name="MiLab 5 SSH">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/gnn-mri" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/data/datasets" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
