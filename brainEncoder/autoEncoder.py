@@ -19,6 +19,8 @@ class AE(torch.nn.Module):
 
         self.encoded_shape = self._calculate_encoded_shape(self.in_channels, [self.conv1, self.conv2], [self.pool1, self.pool2])
 
+        # squeeze?
+
         self.encoder = torch.nn.Sequential(
             torch.nn.Conv3d(in_channels=self.in_channels[0], out_channels=64, kernel_size=self.conv1[0], stride=self.conv1[1], padding=self.conv1[2]),
             torch.nn.ReLU(),

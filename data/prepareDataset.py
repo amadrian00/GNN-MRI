@@ -15,8 +15,8 @@ from torch.utils.data import Dataset
 pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
-    def __init__(self, available_device, save=False, force_update=False):
-        self.root_dir = 'data/datasets/ds004856'
+    def __init__(self, available_device, root_dir='data/datasets/ds004856', save=False, force_update=False):
+        self.root_dir = root_dir
 
         self.available_device = available_device
         self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', self.root_dir+'_gen_files',
