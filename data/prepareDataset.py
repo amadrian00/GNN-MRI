@@ -103,20 +103,21 @@ class DallasDataSet(Dataset):
         Function that joins the pages of a given Dataset."""
     @staticmethod
     def _open_join_excel(excel_file_path, drop_columns):
-        excel = pd.read_excel(excel_file_path, index_col = 0, sheet_name=None)
+        try:
+            excel = pd.read_excel(excel_file_path, index_col=0, sheet_name=None)
+        except Exception as e:
+            raise ValueError(f"Error reading the Excel file: {e}")
+
         merged = pd.DataFrame()
-        index = 1
-        for sheet in excel:
-            sheet = excel[sheet]
-            missing_data = sheet.index[sheet['HasData'] == 2].tolist()
+        for index, (sheet_name, data_frame) in enumerate(excel.items(), start=1):
+            missing_data = data_frame[data_frame['HasData'] == 2].index
 
-            sheet = sheet.drop(index=missing_data)
-            sheet = sheet.drop(columns=drop_columns)
+            data_frame = data_frame.drop(index=missing_data).drop(columns=drop_columns, errors='ignore')
 
-            sheet = sheet.add_suffix(str(index), 'columns')
+            data_frame = data_frame.add_suffix(f'_{index}')
 
-            merged = pd.concat([merged, sheet], axis=1)
-            index+=1
+            merged = pd.concat([merged, data_frame], axis=1)
+
         return merged
 
     """ Input:  save_dir: String indicating the directory where the generated files are stored.
