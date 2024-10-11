@@ -214,19 +214,19 @@ class DallasDataSet(Dataset):
             file_path = list(subdir.glob('*-rest_run-*_bold.nii.gz'))
             file = None
             if len(file_path) > 0:
-                file = (file_dir + '\\func\\' + file_path[-1].name) #If 2 runs for the same wave just get the last.
+                file = f"{file_dir}/func/{file_path[-1].name}" #If 2 runs for the same wave just get the last.
 
             if paths['Patient'].eq(patient).any():
-                paths.loc[paths['Patient'] == patient, 'Wave'+wave] = file
+                paths.loc[paths['Patient'] == patient, f'Wave{wave}'] = file
             else:
-                paths.loc[len(paths), ['Patient','Wave'+wave]] = [patient, file]
+                paths = paths.append({'Patient': patient, f'Wave{wave}': file}, ignore_index=True)
 
         paths.set_index('Patient', inplace=True)
         paths.index = paths.index.astype(int)
         paths.index.name = 'S#'
         paths.sort_index(inplace=True)
 
-        if save: paths.to_csv(save_dir + 'surveys/fmri_paths.csv')
+        if save: paths.to_csv(f"{save_dir}/surveys/fmri_paths.csv")
 
         return paths
 
