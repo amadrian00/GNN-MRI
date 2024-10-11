@@ -19,7 +19,7 @@ class DallasDataSet(Dataset):
         self.root_dir = root_dir
 
         self.available_device = available_device
-        self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', self.root_dir+'_gen_files',
+        self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', self.root_dir+'_gen_files/',
                                                save, force_update)
         self.fmri_data = self.dataframe['rfMRI'].values
 
@@ -226,7 +226,7 @@ class DallasDataSet(Dataset):
         paths.index.name = 'S#'
         paths.sort_index(inplace=True)
 
-        if save: paths.to_csv(f"{save_dir}/surveys/fmri_paths.csv")
+        if save: paths.to_csv(f"{save_dir}fmri_paths.csv")
 
         return paths
 
