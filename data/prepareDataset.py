@@ -35,6 +35,9 @@ class DallasDataSet(Dataset):
             dataset = pd.read_csv(save_dir + 'dataset.csv', index_col=0)
 
         else:
+            if save and not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
             physical_health, mental_health, _ = self._excel_to_pandas(files_dir, save_dir, save)
 
             participants = self._load_clean_participants(save_dir, self.root_dir + '/participants.tsv', save)
@@ -66,7 +69,7 @@ class DallasDataSet(Dataset):
             if save:
                 dataset.to_csv(save_dir + 'dataset.csv')
 
-        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x).slicer[:,:,:,:124], dataset['rfMRI'].values)))
+        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x), dataset['rfMRI'].values)))
         return dataset
 
     """ Input:  files_dir: String indicating the root directory where the dataset files are stored.
@@ -114,7 +117,7 @@ class DallasDataSet(Dataset):
 
             data_frame = data_frame.drop(index=missing_data).drop(columns=drop_columns, errors='ignore')
 
-            data_frame = data_frame.add_suffix(f'_{index}')
+            data_frame = data_frame.add_suffix(f'{index}')
 
             merged = pd.concat([merged, data_frame], axis=1)
 
@@ -206,6 +209,7 @@ class DallasDataSet(Dataset):
     @staticmethod
     def _get_fmri_path(save_dir, root_dir, save=False):
         paths = pd.DataFrame(columns=['Patient', 'Wave1', 'Wave2', 'Wave3'])
+
         for subdir in Path(root_dir).glob('sub-*/*/func'):
             file_dir = str(subdir.parent)
             wave = re.search(r'ses-wave(\d+)', file_dir).group(1)
@@ -219,7 +223,7 @@ class DallasDataSet(Dataset):
             if paths['Patient'].eq(patient).any():
                 paths.loc[paths['Patient'] == patient, f'Wave{wave}'] = file
             else:
-                paths = paths.append({'Patient': patient, f'Wave{wave}': file}, ignore_index=True)
+                paths.loc[len(paths), ['Patient','Wave'+wave]] = [patient, file]
 
         paths.set_index('Patient', inplace=True)
         paths.index = paths.index.astype(int)
@@ -245,8 +249,8 @@ class DallasDataSet(Dataset):
 
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
-        processed_img = clean_img(self.fmri_data[idx])
-        return torch.tensor(np.transpose(processed_img.get_fdata(), [3,2,0,1]), dtype=torch.float32,
+        processed_img = clean_img(self.fmri_data[idx].slicer[:,:,:,:124])
+        return torch.tensor(np.transpose(np.asarray(processed_img.dataobj), [3,2,0,1]), dtype=torch.float32,
                                 device=self.available_device)
 
     """ Input:  

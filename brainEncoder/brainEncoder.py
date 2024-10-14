@@ -5,7 +5,7 @@ from . import autoEncoder
 
 class BrainEncoder:
     def __init__(self, available_device, in_channels, encoder_name='AutoEncoder'):
-        self.encoder = self._select_encoder(available_device, encoder_name, in_channels)
+        self.encoder = self._select_encoder(available_device, in_channels, encoder_name)
         self.features = None
 
     """ Input:  dataset: Data to generate predictions.
@@ -29,7 +29,7 @@ class BrainEncoder:
     
         Function that instantiates the desired encoder."""
     @staticmethod
-    def _select_encoder(available_device, encoder_name, in_channels):
+    def _select_encoder(available_device,in_channels, encoder_name):
         encoder_instance = None
 
         if encoder_name == 'AutoEncoder':

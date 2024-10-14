@@ -11,6 +11,8 @@ class AE(torch.nn.Module):
         super().__init__()
         self.in_channels = in_channels
 
+        self.available_device = available_device
+
         self.conv1 = (3,1,1)
         self.conv2 = (3,1,1)
 
