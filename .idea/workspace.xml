@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Clean code">
+    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Fix data leakage">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/brainEncoder/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/prepareDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/prepareDataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphNeuralNetworks/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphNeuralNetworks/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,37 +50,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python.Test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.autoEncoder.executor&quot;: &quot;Run&quot;,
-    &quot;Python.diagnoseTool.executor&quot;: &quot;Run&quot;,
-    &quot;Python.gnn-mri.executor&quot;: &quot;Run&quot;,
-    &quot;Python.graphCreation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.graphNN.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.tests.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/PycharmProjects/GNN-MRI/data/datasets&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python.Clean.executor": "Run",
+    "Python.Test.executor": "Run",
+    "Python.Tests.executor": "Run",
+    "Python.autoEncoder.executor": "Run",
+    "Python.clean.executor": "Run",
+    "Python.diagnoseTool.executor": "Run",
+    "Python.gnn-mri.executor": "Run",
+    "Python.graphCreation.executor": "Run",
+    "Python.graphNN.executor": "Run",
+    "Python.prepareDataset.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.tests.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "D:/PycharmProjects/GNN-MRI/clean.py",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "reference.settings.deploy.options",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\PycharmProjects\GNN-MRI\brainEncoder" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\PycharmProjects\GNN-MRI\data\datasets\ds004856_gen_files" />
       <recent name="D:\PycharmProjects\GNN-MRI" />
     </key>
   </component>
@@ -91,7 +95,31 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.Tests">
+    <configuration name="Clean" type="PythonConfigurationType" factoryName="Python">
+      <module name="GNN-MRI" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="gnn-mri" />
+      <option name="WORKING_DIRECTORY" value="D:\PycharmProjects\GNN-MRI" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/clean.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="Tests" type="PythonConfigurationType" factoryName="Python">
       <module name="GNN-MRI" />
       <option name="ENV_FILES" value="" />
@@ -139,6 +167,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="clean" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="GNN-MRI" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/clean.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="diagnoseTool" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="GNN-MRI" />
       <option name="ENV_FILES" value="" />
@@ -162,7 +213,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="graphCreation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="prepareDataset" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="GNN-MRI" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -171,35 +222,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/graphNeuralNetworks" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/graphNeuralNetworks/graphCreation.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="graphNN" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="GNN-MRI" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="D:\PycharmProjects\GNN-MRI" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/graphNeuralNetworks/graphNN.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/prepareDataset.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -234,19 +262,20 @@
     </configuration>
     <list>
       <item itemvalue="Python.Tests" />
-      <item itemvalue="Python.test" />
+      <item itemvalue="Python.Clean" />
+      <item itemvalue="Python.prepareDataset" />
+      <item itemvalue="Python.clean" />
       <item itemvalue="Python.autoEncoder" />
       <item itemvalue="Python.diagnoseTool" />
-      <item itemvalue="Python.graphCreation" />
-      <item itemvalue="Python.graphNN" />
+      <item itemvalue="Python.test" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.test" />
+        <item itemvalue="Python.prepareDataset" />
+        <item itemvalue="Python.clean" />
         <item itemvalue="Python.autoEncoder" />
         <item itemvalue="Python.diagnoseTool" />
-        <item itemvalue="Python.graphNN" />
-        <item itemvalue="Python.graphCreation" />
       </list>
     </recent_temporary>
   </component>
@@ -294,7 +323,16 @@
       <workItem from="1728352892761" duration="899000" />
       <workItem from="1728357518487" duration="13607000" />
       <workItem from="1728373323985" duration="8096000" />
-      <workItem from="1728488092682" duration="15869000" />
+      <workItem from="1728488092682" duration="22948000" />
+      <workItem from="1728553193378" duration="10326000" />
+      <workItem from="1728607440617" duration="11397000" />
+      <workItem from="1728633925851" duration="8993000" />
+      <workItem from="1728753630355" duration="31000" />
+      <workItem from="1728753680626" duration="12065000" />
+      <workItem from="1728884542932" duration="6930000" />
+      <workItem from="1728893286603" duration="5531000" />
+      <workItem from="1728951883720" duration="25206000" />
+      <workItem from="1729044463826" duration="17483000" />
     </task>
     <task id="LOCAL-00001" summary="Modify requirements.txt">
       <option name="closed" value="true" />
@@ -440,7 +478,47 @@
       <option name="project" value="LOCAL" />
       <updated>1728376505609</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Minor update">
+      <option name="closed" value="true" />
+      <created>1728541228943</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1728541228943</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Simplify _excel_to_pandas">
+      <option name="closed" value="true" />
+      <created>1728632041974</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1728632041974</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Update _get_fmri_path">
+      <option name="closed" value="true" />
+      <created>1728632255678</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1728632255678</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Fix bug">
+      <option name="closed" value="true" />
+      <created>1728644573357</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1728644573357</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Fix data leakage">
+      <option name="closed" value="true" />
+      <created>1728884889477</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1728884889477</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -469,22 +547,29 @@
     <MESSAGE value="Adapt dataset to extend Pytorch implementation" />
     <MESSAGE value="Delete unused parts" />
     <MESSAGE value="Identified memory leakage" />
-    <MESSAGE value="Minor update" />
     <MESSAGE value="Add .idea and test (Remove in final version)" />
     <MESSAGE value="Save files on separate folder for accessibility" />
     <MESSAGE value="Update workspace.xml" />
     <MESSAGE value="Clean code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Clean code" />
+    <MESSAGE value="Minor update" />
+    <MESSAGE value="Simplify _excel_to_pandas" />
+    <MESSAGE value="Update _get_fmri_path" />
+    <MESSAGE value="Fix bug" />
+    <MESSAGE value="Fix data leakage" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix data leakage" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1728520826969" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
-    <SUITE FILE_PATH="coverage/GNN_MRI$graphCreation.coverage" NAME="graphCreation Coverage Results" MODIFIED="1727418154127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/graphNeuralNetworks" />
-    <SUITE FILE_PATH="coverage/GNN_MRI$graphNN.coverage" NAME="graphNN Coverage Results" MODIFIED="1727418158516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729124769822" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$Test.coverage" NAME="test Coverage Results" MODIFIED="1728350025370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$diagnoseTool.coverage" NAME="diagnoseTool Coverage Results" MODIFIED="1727674794788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects" />
     <SUITE FILE_PATH="coverage/GNN_MRI$tests.coverage" NAME="Tests Coverage Results" MODIFIED="1728350464815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$autoEncoder.coverage" NAME="autoEncoder Coverage Results" MODIFIED="1727847325815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brainEncoder" />
-    <SUITE FILE_PATH="coverage/GNN_MRI$Tests.coverage" NAME="Tests Coverage Results" MODIFIED="1728371973391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$Tests.coverage" NAME="Tests Coverage Results" MODIFIED="1729126146597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$prepareDataset.coverage" NAME="prepareDataset Coverage Results" MODIFIED="1728904979454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$Clean.coverage" NAME="Clean Coverage Results" MODIFIED="1728892474646" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$graphCreation.coverage" NAME="graphCreation Coverage Results" MODIFIED="1727418154127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/graphNeuralNetworks" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$graphNN.coverage" NAME="graphNN Coverage Results" MODIFIED="1727418158516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$clean.coverage" NAME="clean Coverage Results" MODIFIED="1728886161963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GNN_MRI$gnn_mri.coverage" NAME="gnn-mri Coverage Results" MODIFIED="1727416390389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

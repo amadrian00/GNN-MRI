@@ -7,6 +7,7 @@ class BrainEncoder:
     def __init__(self, available_device, in_channels, encoder_name='AutoEncoder'):
         self.encoder = self._select_encoder(available_device, in_channels, encoder_name)
         self.features = None
+        self.encoder.to(available_device)
 
     """ Input:  dataset: Data to generate predictions.
                 save: Boolean that indicates whether to save the features as a file or not.

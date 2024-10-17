@@ -8,34 +8,40 @@ import numpy as np
 import pandas as pd
 import nibabel as nib
 from pathlib import Path
-from nilearn.image import clean_img
+from nilearn.signal import clean
+from nilearn.image import resample_img
+from pandas.io.xml import preprocess_data
 from torch.utils.data import Dataset
+from nilearn.masking import compute_multi_epi_mask, apply_mask
 
 # Set future behavior for downcasting
 pd.set_option('future.no_silent_downcasting', True)
 
 class DallasDataSet(Dataset):
-    def __init__(self, available_device, root_dir='data/datasets/ds004856', save=False, force_update=False):
-        self.root_dir = root_dir
+    def __init__(self, available_device, root_dir='data/datasets/', save=False, force_update=False, preprocess= False):
+        self.mask = None
+        self.mask_affine = None
 
+        self.root_dir = root_dir + '/ds004856'
         self.available_device = available_device
-        self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', self.root_dir+'_gen_files/',
-                                               save, force_update)
-        self.fmri_data = self.dataframe['rfMRI'].values
+
+        self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', 'data/datasets/ds004856_gen_files/', save, force_update, preprocess)
+        self.fmri_data = None
 
     """ Input:  files_dir: String indicating the root directory where the dataset files are stored.
                 save_dir: String indicating the directory where the generated files are stored.
                 save: Boolean that indicates whether to save the dataset.
                 force_update: Boolean that indicates whether to force update the dataset if it exists.
+                preprocess: Boolean that indicates whether to preprocess the dataset.
         Output: PandasDataframe containing the dataset.
         
         Function that returns the dataset with the labels."""
-    def generate_dataset(self, files_dir, save_dir, save, force_update):
-        if os.path.isfile(save_dir + 'dataset.csv') and not force_update:
+    def generate_dataset(self, files_dir, save_dir, save, force_update, preprocess):
+        if os.path.isfile(save_dir + 'dataset.csv') and not force_update: # If dataset exists and update is not forced just load it.
             dataset = pd.read_csv(save_dir + 'dataset.csv', index_col=0)
 
         else:
-            if save and not os.path.exists(save_dir):
+            if save and not os.path.exists(save_dir): # If the directory to save files does not exist then create it.
                 os.makedirs(save_dir)
 
             physical_health, mental_health, _ = self._excel_to_pandas(files_dir, save_dir, save)
@@ -52,10 +58,10 @@ class DallasDataSet(Dataset):
             w2 = data[['AgeMRI_W2', 'Sex', 'Sys2', 'Dia2', 'CESDepression2', 'Alzheimer2', 'Wave2']]
             w3 = data[['AgeMRI_W3', 'Sex', 'Sys3', 'Dia3', 'CESDepression3', 'Alzheimer3', 'Wave3']]
 
-            for w in [w1, w2, w3]:
+            for w in [w1, w2, w3]: # Create one dataset per wave.
                 w.columns = ['Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer','rfMRI']
 
-            dataset = pd.concat([w1, w2, w3], axis=0)
+            dataset = pd.concat([w1, w2, w3], axis=0) # Join the wave datasets as one.
 
             dataset['Participant'] = dataset.index
             dataset = dataset.dropna(subset=['Age'])
@@ -66,10 +72,29 @@ class DallasDataSet(Dataset):
 
             dataset = dataset[['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI']]
 
-            if save:
-                dataset.to_csv(save_dir + 'dataset.csv')
+        dataset['file_rfMRI'] = np.array(list(map(lambda x: nib.load(x), dataset['rfMRI'].values))) # Load image files.
+        self.fmri_data = dataset['file_rfMRI'].values
 
-        dataset['rfMRI'] = np.array(list(map(lambda x: nib.load(x), dataset['rfMRI'].values)))
+        if  not os.path.isfile(save_dir + 'mask.nii.gz') or force_update: # If mask does not exist or force update then create it.
+            self.mask_affine = dataset['file_rfMRI'].values[0].affine
+            self.mask = compute_multi_epi_mask(dataset['file_rfMRI'].values, n_jobs=-1, target_shape=(64, 64, 43),
+                                          target_affine=dataset['file_rfMRI'].values[0].affine, threshold=0.22)
+            np.save(save_dir + 'mask_affine.npy', self.mask_affine)
+            nib.save(self.mask, save_dir + 'mask.nii.gz')
+        else:
+            self.mask = nib.load(save_dir + 'mask.nii.gz')
+            self.mask_affine = np.load(save_dir + 'mask_affine.npy')
+
+        if preprocess or not os.path.isfile(save_dir + 'dataset.csv') or force_update: # If explicitly requested preprocess or the dataset file does not exist or force update, then preprocess the dataset.
+            self._preprocess(dataset, self.fmri_data, self.mask_affine, self.mask)
+
+        if save:
+            cols_to_save = ['Participant', 'Age', 'Sex', 'Sys', 'Dia', 'CESDepression', 'Alzheimer', 'rfMRI', 'clean']
+            dataset[cols_to_save].to_csv(save_dir + 'dataset.csv')
+
+        dataset['clean'] = np.array(list(map(lambda x: np.load(x, mmap_mode='r'), dataset['clean'].values)))
+
+        print('Dallas dataset has been generated correctly.')
         return dataset
 
     """ Input:  files_dir: String indicating the root directory where the dataset files are stored.
@@ -244,14 +269,32 @@ class DallasDataSet(Dataset):
         dataset.append(clusters)
         return dataset
 
+    """ Input:  dataframe: Dataframe instance.
+                fmri_data: FMRI image object's array.
+                mask_affine: Mask affine transformation matrix.
+                mask: Mask image.
+        Output: -
+
+        Function that preprocesses the fMRI files or adds their paths to the dataframe."""
+    @staticmethod
+    def _preprocess(dataframe, fmri_data, mask_affine, mask):
+        for index, elem in dataframe.iterrows():
+            path_dir = re.match(r"(.*)/", elem['rfMRI']).group(0)
+            sfmri = resample_img(fmri_data[index].slicer[:, :, :, :124:2], target_shape=(64, 64, 43),
+                                 target_affine=mask_affine)
+            clean_data = clean(apply_mask(sfmri, mask, smoothing_fwhm=6), standardize='zscore_sample')
+            np.save(path_dir+'clean_signal.npy', clean_data.reshape(-1).astype('float32'))
+
+            dataframe.at[index, 'clean'] = path_dir+'clean_signal.npy'
+
     """ Input:  idx: Integer indicating the index of the item to get.
         Output: Time of the dataset.
 
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
-        processed_img = clean_img(self.fmri_data[idx].slicer[:,:,:,:124])
-        return torch.tensor(np.transpose(np.asarray(processed_img.dataobj), [3,2,0,1]), dtype=torch.float32,
-                                device=self.available_device)
+        sfmri = resample_img(self.fmri_data[idx].slicer[:,:,:,:124:2], target_shape= (64, 64, 43), target_affine=self.mask_affine)
+        clean_data = clean(apply_mask(sfmri, self.mask, smoothing_fwhm=6), standardize='zscore_sample')
+        return torch.tensor(clean_data.reshape(-1), dtype=torch.float32, device=self.available_device)
 
     """ Input:  
         Output: Length of the dataset.
