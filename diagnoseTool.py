@@ -1,7 +1,6 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
-import data.prepareDataset as pD
 import clustering.clusterFinder as cF
 import brainEncoder.brainEncoder as bE
 import graphNeuralNetworks.graphNN as gNN

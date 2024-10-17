@@ -2,10 +2,8 @@
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import torch
-from gc import get_objects
 from datetime import datetime
 import matplotlib.pyplot as plt
-from collections import defaultdict
 
 class AE(torch.nn.Module):
     def __init__(self, available_device, in_channels):

@@ -10,7 +10,6 @@ import nibabel as nib
 from pathlib import Path
 from nilearn.signal import clean
 from nilearn.image import resample_img
-from pandas.io.xml import preprocess_data
 from torch.utils.data import Dataset
 from nilearn.masking import compute_multi_epi_mask, apply_mask
 
@@ -27,6 +26,7 @@ class DallasDataSet(Dataset):
 
         self.dataframe = self.generate_dataset(self.root_dir+'/surveys/', 'data/datasets/ds004856_gen_files/', save, force_update, preprocess)
         self.fmri_data = None
+        self.clean_data = self.dataframe['clean'].values
 
     """ Input:  files_dir: String indicating the root directory where the dataset files are stored.
                 save_dir: String indicating the directory where the generated files are stored.
@@ -280,9 +280,9 @@ class DallasDataSet(Dataset):
     def _preprocess(dataframe, fmri_data, mask_affine, mask):
         for index, elem in dataframe.iterrows():
             path_dir = re.match(r"(.*)/", elem['rfMRI']).group(0)
-            sfmri = resample_img(fmri_data[index].slicer[:, :, :, :124:2], target_shape=(64, 64, 43),
+            smooth_fmri = resample_img(fmri_data[index].slicer[:, :, :, :124:2], target_shape=(64, 64, 43),
                                  target_affine=mask_affine)
-            clean_data = clean(apply_mask(sfmri, mask, smoothing_fwhm=6), standardize='zscore_sample')
+            clean_data = clean(apply_mask(smooth_fmri, mask, smoothing_fwhm=6), standardize='zscore_sample')
             np.save(path_dir+'clean_signal.npy', clean_data.reshape(-1).astype('float32'))
 
             dataframe.at[index, 'clean'] = path_dir+'clean_signal.npy'
@@ -292,9 +292,7 @@ class DallasDataSet(Dataset):
 
         Function that returns the item at the given index of the dataset."""
     def __getitem__(self, idx):
-        sfmri = resample_img(self.fmri_data[idx].slicer[:,:,:,:124:2], target_shape= (64, 64, 43), target_affine=self.mask_affine)
-        clean_data = clean(apply_mask(sfmri, self.mask, smoothing_fwhm=6), standardize='zscore_sample')
-        return torch.tensor(clean_data.reshape(-1), dtype=torch.float32, device=self.available_device)
+        return torch.tensor(self.clean_data[idx], dtype=torch.float32, device=self.available_device)
 
     """ Input:  
         Output: Length of the dataset.

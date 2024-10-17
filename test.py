@@ -3,14 +3,10 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import os
 
-import nilearn.plotting
 import torch
-import nibabel as nib
-from sympy.physics.control.control_plots import matplotlib
 from torch.utils import data
 from data import prepareDataset
 from brainEncoder import brainEncoder
-from nilearn.masking import compute_multi_epi_mask
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "4"

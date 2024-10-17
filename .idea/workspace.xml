@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Fix data leakage">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Instead of using 4D images, transform 4D images to 2D voxel signal.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/prepareDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/prepareDataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -332,7 +328,7 @@
       <workItem from="1728884542932" duration="6930000" />
       <workItem from="1728893286603" duration="5531000" />
       <workItem from="1728951883720" duration="25206000" />
-      <workItem from="1729044463826" duration="17483000" />
+      <workItem from="1729044463826" duration="19385000" />
     </task>
     <task id="LOCAL-00001" summary="Modify requirements.txt">
       <option name="closed" value="true" />
@@ -518,7 +514,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728884889477</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Instead of using 4D images, transform 4D images to 2D voxel signal.">
+      <option name="closed" value="true" />
+      <created>1729126517437</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1729126517437</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -556,7 +560,8 @@
     <MESSAGE value="Update _get_fmri_path" />
     <MESSAGE value="Fix bug" />
     <MESSAGE value="Fix data leakage" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix data leakage" />
+    <MESSAGE value="Instead of using 4D images, transform 4D images to 2D voxel signal." />
+    <option name="LAST_COMMIT_MESSAGE" value="Instead of using 4D images, transform 4D images to 2D voxel signal." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729124769822" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
