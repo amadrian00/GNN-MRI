@@ -39,12 +39,13 @@ class BrainEncoder:
         return encoder_instance
 
     """ Input:  data_loader: Dataloader instance.
+                epochs: Integer indicating the number of epochs to train the model.
                 batch_size: Integer indicating the batch size.
         Output: -.
 
         Function that trains the dataset. """
-    def train(self, data_loader, batch_size):
-        self.encoder.train_loop(data_loader, batch_size)
+    def train(self, train_loader, val_dataloader, epochs, batch_size):
+        self.encoder.train_loop(train_loader, val_dataloader, epochs, batch_size)
 
 
 if __name__=="__main__":

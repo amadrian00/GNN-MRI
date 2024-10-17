@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Instead of using 4D images, transform 4D images to 2D voxel signal.">
+    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Delete unused imports">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/brainEncoder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/prepareDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/prepareDataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +39,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -75,6 +78,24 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="QodanaHighlightedReportService">
+    <option name="localRunNotPublishedPersistedInfo">
+      <LocalReportPersistedInfo>
+        <option name="path" value="C:\Users\Adrian\AppData\Local\Temp\qodana_output1\qodana.sarif.json" />
+        <option name="reportGuid" value="aaa5c97a-4db2-4920-bdcd-70e8b5b0691e" />
+        <option name="reportName" value="GNN-MRI/qodana/2024-10-17" />
+      </LocalReportPersistedInfo>
+    </option>
+  </component>
+  <component name="QodanaIsSelectedPersistenceService">
+    <option name="selectedOrLoading" value="true" />
+  </component>
+  <component name="QodanaReportsService">
+    <option name="descriptions">
+      <ReportDescription localRun="true" path="C:\Users\Adrian\AppData\Local\Temp\qodana_output\qodana.sarif.json" reportGuid="85de2fee-f6c9-4dc3-93ab-d35fc96d2ea8" reportId="GNN-MRI/qodana/2024-10-17" />
+      <ReportDescription localRun="true" path="C:\Users\Adrian\AppData\Local\Temp\qodana_output1\qodana.sarif.json" reportGuid="aaa5c97a-4db2-4920-bdcd-70e8b5b0691e" reportId="GNN-MRI/qodana/2024-10-17" />
+    </option>
+  </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\PycharmProjects\GNN-MRI\brainEncoder" />
@@ -91,7 +112,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Tests">
+  <component name="RunManager" selected="Python.test">
     <configuration name="Clean" type="PythonConfigurationType" factoryName="Python">
       <module name="GNN-MRI" />
       <option name="ENV_FILES" value="" />
@@ -248,7 +269,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="PARAMETERS" value="-e=5 -b=128" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -328,7 +349,7 @@
       <workItem from="1728884542932" duration="6930000" />
       <workItem from="1728893286603" duration="5531000" />
       <workItem from="1728951883720" duration="25206000" />
-      <workItem from="1729044463826" duration="19385000" />
+      <workItem from="1729044463826" duration="39607000" />
     </task>
     <task id="LOCAL-00001" summary="Modify requirements.txt">
       <option name="closed" value="true" />
@@ -522,7 +543,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729126517437</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Delete unused imports">
+      <option name="closed" value="true" />
+      <created>1729128447130</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1729128447130</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -561,15 +590,16 @@
     <MESSAGE value="Fix bug" />
     <MESSAGE value="Fix data leakage" />
     <MESSAGE value="Instead of using 4D images, transform 4D images to 2D voxel signal." />
-    <option name="LAST_COMMIT_MESSAGE" value="Instead of using 4D images, transform 4D images to 2D voxel signal." />
+    <MESSAGE value="Delete unused imports" />
+    <option name="LAST_COMMIT_MESSAGE" value="Delete unused imports" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729124769822" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729153523185" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$Test.coverage" NAME="test Coverage Results" MODIFIED="1728350025370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$diagnoseTool.coverage" NAME="diagnoseTool Coverage Results" MODIFIED="1727674794788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects" />
     <SUITE FILE_PATH="coverage/GNN_MRI$tests.coverage" NAME="Tests Coverage Results" MODIFIED="1728350464815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$autoEncoder.coverage" NAME="autoEncoder Coverage Results" MODIFIED="1727847325815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/brainEncoder" />
-    <SUITE FILE_PATH="coverage/GNN_MRI$Tests.coverage" NAME="Tests Coverage Results" MODIFIED="1729126146597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$Tests.coverage" NAME="Tests Coverage Results" MODIFIED="1729151646224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$prepareDataset.coverage" NAME="prepareDataset Coverage Results" MODIFIED="1728904979454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/GNN_MRI$Clean.coverage" NAME="Clean Coverage Results" MODIFIED="1728892474646" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$graphCreation.coverage" NAME="graphCreation Coverage Results" MODIFIED="1727418154127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/graphNeuralNetworks" />
