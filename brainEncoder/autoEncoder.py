@@ -95,7 +95,7 @@ class AE(torch.nn.Module):
 
                     val_loss = loss_function(val_elements_reconstructed, val_batch_data)
                     val_batch_losses.append(val_loss.detach().item())  # Storing the losses in a list for plotting
-                    print(f"{'':<40}Validation loss for epoch: {epoch} {'':<20} {val_loss:.4f}")
+                    print(f"{'':<25}Validation loss for epoch{epoch}: {val_loss:.4f}")
             val_losses.append(sum(val_batch_losses)/len(val_batch_losses))
 
         print(f"Finished training at {datetime.now().strftime("%H:%M:%S")}.\n")
@@ -106,8 +106,8 @@ class AE(torch.nn.Module):
         plt.plot(epoch_list, train_losses, label='Train Loss', color='blue', marker='o')
         plt.plot(epoch_list, val_losses, label='Validation Loss', color='orange', marker='x')
 
-        plt.xticks(np.arange(0, epochs, max(1,epochs // 10)))
-        plt.ylim(min(train_losses)-0.025, max(train_losses)+0.025)
+        plt.xticks(np.arange(0, epochs+1, max(1,epochs // 10)))
+        plt.ylim(min(train_losses)-0.005, max(train_losses)+0.005)
 
         # Label the axes and title
         plt.xlabel('Epochs')
