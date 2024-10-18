@@ -59,10 +59,8 @@ if __name__ == '__main__':
     test_df = DallasDataSet(device, df=test_df)
 
     train_dataloader = data.DataLoader(train_df, batch_size=args.batch_size, shuffle=True)
-    val_dataloader = data.DataLoader(val_df, batch_size=args.batch_size, shuffle=True)
-    test_dataloader = data.DataLoader(test_df, batch_size=args.batch_size, shuffle=True)
-
-    print(dataset.__getitem__(0)[0].shape)
+    val_dataloader = data.DataLoader(val_df, batch_size=len(val_df), shuffle=True)
+    test_dataloader = data.DataLoader(test_df, batch_size=len(test_df), shuffle=True)
 
     brainEncoder = brainEncoder.BrainEncoder(device, dataset.__getitem__(0)[0].shape,'AutoEncoder')
 

@@ -3,6 +3,8 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import torch
 import numpy as np
+from openpyxl.styles.builtins import total
+from tqdm import tqdm
 from datetime import datetime
 import matplotlib.pyplot as plt
 
@@ -72,7 +74,7 @@ class AE(torch.nn.Module):
             self.train()
             i = 0
             batch_losses = []
-            for batch in train_loader:
+            for batch in tqdm(train_loader):
                 batch_data, labels = batch
                 weights = torch.where(labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
 
@@ -103,9 +105,8 @@ class AE(torch.nn.Module):
                     val_elements_reconstructed = self(val_batch_data)
 
                     val_loss = self.weighted_mse_loss(val_elements_reconstructed, val_batch_data, val_weights)
-                    val_batch_losses.append(val_loss.detach().item())  # Storing the losses in a list for plotting
-            val_losses.append(sum(val_batch_losses)/len(val_batch_losses))
-            print(f"{'':<15}Validation loss for epoch {epoch}: {val_losses[-1]:.4f}")
+            val_losses.append(val_loss.detach().item())
+            print(f"{'':<10}Validation loss for epoch {epoch}: {val_losses[-1]:.4f}")
 
         print(f"Finished training at {datetime.now().strftime("%H:%M:%S")}.\n")
 
