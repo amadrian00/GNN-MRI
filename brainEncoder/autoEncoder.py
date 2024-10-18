@@ -3,7 +3,6 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
 import torch
 import numpy as np
-from openpyxl.styles.builtins import total
 from tqdm import tqdm
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -87,15 +86,12 @@ class AE(torch.nn.Module):
                 loss.backward()
                 optimizer.step()
 
-                # print(f"{'':<10}Epoch: {epoch} {'':<20}Batch Start Index: {i} {'':<20}Loss: {loss:.4f}")
                 i += batch_size
 
                 batch_losses.append(loss.detach().item()) # Storing the losses in a list for plotting
             train_losses.append(sum(batch_losses)/len(batch_losses))
-            print(f"{'':<10}Training loss for epoch {epoch}: {train_losses[-1]:.4f}")
 
             self.eval()
-            val_batch_losses = []
             with torch.no_grad():
                 for val_batch in val_dataloader:
                     val_batch_data, val_labels = val_batch
@@ -106,7 +102,6 @@ class AE(torch.nn.Module):
 
                     val_loss = self.weighted_mse_loss(val_elements_reconstructed, val_batch_data, val_weights)
             val_losses.append(val_loss.detach().item())
-            print(f"{'':<10}Validation loss for epoch {epoch}: {val_losses[-1]:.4f}")
 
         print(f"Finished training at {datetime.now().strftime("%H:%M:%S")}.\n")
 

@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Added weighted loss">
+    <list default="true" id="022575bf-d566-4b6e-971a-275181060458" name="Changes" comment="Added progress bar (tqdm)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/brainEncoder/autoEncoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -322,7 +321,7 @@
       <workItem from="1728884542932" duration="6930000" />
       <workItem from="1728893286603" duration="5531000" />
       <workItem from="1728951883720" duration="25206000" />
-      <workItem from="1729044463826" duration="56234000" />
+      <workItem from="1729044463826" duration="58299000" />
     </task>
     <task id="LOCAL-00001" summary="Modify requirements.txt">
       <option name="closed" value="true" />
@@ -556,7 +555,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729231256226</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Added progress bar (tqdm)">
+      <option name="closed" value="true" />
+      <created>1729232086846</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1729232086846</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -598,10 +605,11 @@
     <MESSAGE value="Minor updates and add arguments parsing" />
     <MESSAGE value="Minor update" />
     <MESSAGE value="Added weighted loss" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added weighted loss" />
+    <MESSAGE value="Added progress bar (tqdm)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added progress bar (tqdm)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729231860312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
+    <SUITE FILE_PATH="coverage/GNN_MRI$test.coverage" NAME="test Coverage Results" MODIFIED="1729234486569" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$Test.coverage" NAME="test Coverage Results" MODIFIED="1728350025370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
     <SUITE FILE_PATH="coverage/GNN_MRI$diagnoseTool.coverage" NAME="diagnoseTool Coverage Results" MODIFIED="1727674794788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects" />
     <SUITE FILE_PATH="coverage/GNN_MRI$tests.coverage" NAME="Tests Coverage Results" MODIFIED="1728350464815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:\PycharmProjects\GNN-MRI" />
