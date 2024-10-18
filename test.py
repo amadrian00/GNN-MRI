@@ -43,6 +43,14 @@ if __name__ == '__main__':
 
     dataset = prepareDataset.DallasDataSet(device, root_dir=root_dir)
 
+    column = 'CESDepression'
+    count_class_0 = len(dataset.dataframe.loc[dataset.dataframe[column] == 0])
+    count_class_1 = len(dataset.dataframe.loc[dataset.dataframe[column] == 1])
+
+    # Calculate weights for each class
+    weight_for_class_0 = len(dataset.dataframe) / (count_class_0 * 2)  # Majority class weight
+    weight_for_class_1 = len(dataset.dataframe) / (count_class_1 * 2)  # Minority class weight
+
     train_df, temp_df = train_test_split(dataset.dataframe, test_size=0.2, stratify=dataset.dataframe['Alzheimer'], random_state=42)
     val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df['Alzheimer'], random_state=42)
 
@@ -53,6 +61,8 @@ if __name__ == '__main__':
     train_dataloader = data.DataLoader(train_df, batch_size=args.batch_size, shuffle=True)
     val_dataloader = data.DataLoader(val_df, batch_size=args.batch_size, shuffle=True)
     test_dataloader = data.DataLoader(test_df, batch_size=args.batch_size, shuffle=True)
+
+    print(dataset.__getitem__(0)[0].shape)
 
     brainEncoder = brainEncoder.BrainEncoder(device, dataset.__getitem__(0)[0].shape,'AutoEncoder')
 

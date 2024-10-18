@@ -50,6 +50,10 @@ class AE(torch.nn.Module):
     def encode(self, x):
         return self.encoder(x)
 
+    def weighted_mse_loss(self, y_hat, y, weight):
+        weight = weight.view(-1, 1)
+        return (weight * (y_hat - y) ** 2).mean() / torch.sum(weight)
+
     """ Input:  train_loader: Instance of data to train the model.
                 val_dataloader: Instance of data to validate the model.
                 epochs: Integer indicating the number of epochs to train the model.
@@ -59,8 +63,8 @@ class AE(torch.nn.Module):
     def train_loop(self, train_loader, val_dataloader, epochs, batch_size):
         print(f"\nStarted training at {datetime.now().strftime("%H:%M:%S")}.")
 
-        loss_function = torch.nn.MSELoss()
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-1, weight_decay=1e-8)
+        #loss_function = torch.nn.MSELoss()
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-8)
 
         train_losses = []
         val_losses = []
@@ -69,34 +73,39 @@ class AE(torch.nn.Module):
             i = 0
             batch_losses = []
             for batch in train_loader:
-                batch_data, _ = batch
+                batch_data, labels = batch
+                weights = torch.where(labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
+
                 batch_data.to(self.available_device)
                 elements_reconstructed = self(batch_data)
 
-                loss = loss_function(elements_reconstructed, batch_data) # Calculating the loss function
+                loss = self.weighted_mse_loss(elements_reconstructed, batch_data, weights) # Calculating the loss function
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                print(f"{'':<10} Epoch: {epoch} {'':<20} Batch Start Index: {i} {'':<20} Loss: {loss:.4f}")
+                # print(f"{'':<10}Epoch: {epoch} {'':<20}Batch Start Index: {i} {'':<20}Loss: {loss:.4f}")
                 i += batch_size
 
                 batch_losses.append(loss.detach().item()) # Storing the losses in a list for plotting
             train_losses.append(sum(batch_losses)/len(batch_losses))
+            print(f"{'':<10}Training loss for epoch {epoch}: {train_losses[-1]:.4f}")
 
             self.eval()
             val_batch_losses = []
             with torch.no_grad():
                 for val_batch in val_dataloader:
-                    val_batch_data, _ = val_batch
+                    val_batch_data, val_labels = val_batch
+                    val_weights = torch.where(val_labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
+
                     val_batch_data.to(self.available_device)
                     val_elements_reconstructed = self(val_batch_data)
 
-                    val_loss = loss_function(val_elements_reconstructed, val_batch_data)
+                    val_loss = self.weighted_mse_loss(val_elements_reconstructed, val_batch_data, val_weights)
                     val_batch_losses.append(val_loss.detach().item())  # Storing the losses in a list for plotting
-                    print(f"{'':<25}Validation loss for epoch{epoch}: {val_loss:.4f}")
             val_losses.append(sum(val_batch_losses)/len(val_batch_losses))
+            print(f"{'':<15}Validation loss for epoch {epoch}: {val_losses[-1]:.4f}")
 
         print(f"Finished training at {datetime.now().strftime("%H:%M:%S")}.\n")
 
@@ -107,7 +116,7 @@ class AE(torch.nn.Module):
         plt.plot(epoch_list, val_losses, label='Validation Loss', color='orange', marker='x')
 
         plt.xticks(np.arange(0, epochs+1, max(1,epochs // 10)))
-        plt.ylim(min(train_losses)-0.005, max(train_losses)+0.005)
+        plt.ylim(min(train_losses)-0.0005, max(train_losses)+0.0005)
 
         # Label the axes and title
         plt.xlabel('Epochs')
