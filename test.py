@@ -51,8 +51,8 @@ if __name__ == '__main__':
     weight_for_class_0 = len(dataset.dataframe) / (count_class_0 * 2)  # Majority class weight
     weight_for_class_1 = len(dataset.dataframe) / (count_class_1 * 2)  # Minority class weight
 
-    train_df, temp_df = train_test_split(dataset.dataframe, test_size=0.2, stratify=dataset.dataframe['Alzheimer'], random_state=42)
-    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df['Alzheimer'], random_state=42)
+    train_df, temp_df = train_test_split(dataset.dataframe, test_size=0.2, stratify=dataset.dataframe['Alzheimer'], random_state=24)
+    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df['Alzheimer'], random_state=24)
 
     train_df = DallasDataSet(device, df=train_df,)
     val_df = DallasDataSet(device, df=val_df)
@@ -64,4 +64,4 @@ if __name__ == '__main__':
 
     brainEncoder = brainEncoder.BrainEncoder(device, dataset.__getitem__(0)[0].shape,'AutoEncoder')
 
-    brainEncoder.train(train_dataloader, val_dataloader, args.epochs, args.batch_size)
+    brainEncoder.fit(train_dataloader, val_dataloader, args.epochs, args.batch_size)

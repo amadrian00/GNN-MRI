@@ -61,7 +61,7 @@ class AE(torch.nn.Module):
                 batch_size: Integer indicating the batch size.
         Output: -
         Function that trains the model with the given data."""
-    def train_loop(self, train_loader, val_dataloader, epochs, batch_size):
+    def fit(self, train_loader, val_dataloader, epochs, batch_size):
         print(f"\nStarted training at {datetime.now().strftime("%H:%M:%S")}.")
 
         #loss_function = torch.nn.MSELoss()
@@ -69,11 +69,16 @@ class AE(torch.nn.Module):
 
         train_losses = []
         val_losses = []
+        best_val = 10
+        best_epoch = 0
+        best_decoder_state_dict = None
         for epoch in range(epochs):
             self.train()
             i = 0
             batch_losses = []
-            for batch in tqdm(train_loader):
+            pq = tqdm(train_loader)
+            pq.set_description(f"Epoch {epoch}")
+            for batch in pq:
                 batch_data, labels = batch
                 weights = torch.where(labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
 
@@ -103,8 +108,15 @@ class AE(torch.nn.Module):
                     val_loss = self.weighted_mse_loss(val_elements_reconstructed, val_batch_data, val_weights)
             val_losses.append(val_loss.detach().item())
 
-        print(f"Finished training at {datetime.now().strftime("%H:%M:%S")}.\n")
+            if val_losses[-1] < best_val:
+                best_val = val_losses[-1]
+                best_decoder_state_dict = self.decoder.state_dict()
+                best_epoch = epoch
 
+        print(f'Finished training at {datetime.now().strftime("%H:%M:%S")}.\n'
+              f'Best iteration {best_epoch}')
+
+        torch.save(best_decoder_state_dict, 'encoder.pt')
         #Plot
         epoch_list = np.arange(0, epochs)
         plt.figure(figsize=(10, 6))
