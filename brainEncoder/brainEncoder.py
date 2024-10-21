@@ -57,6 +57,3 @@ class BrainEncoder:
     def fit_transform(self, train_loader, val_dataloader, epochs, batch_size, save=False):
         self.fit(train_loader, val_dataloader, epochs, batch_size)
         return self.generate_features(train_loader, save), self.generate_features(val_dataloader, save)
-
-if __name__=="__main__":
-    exit(0)
