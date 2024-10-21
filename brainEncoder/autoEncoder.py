@@ -18,23 +18,21 @@ class AE(torch.nn.Module):
         self.encoder = torch.nn.Sequential(
             torch.nn.Linear(in_features=dims[0], out_features=dims[1]),
             torch.nn.BatchNorm1d(dims[1]),
-            torch.nn.LeakyReLU(0.2),
-
+            torch.nn.ELU(),
 
             torch.nn.Linear(in_features=dims[1], out_features=dims[2]),
             torch.nn.BatchNorm1d(dims[2]),
-            torch.nn.LeakyReLU(0.2),
+            torch.nn.ELU(),
         )
 
-        # Linear encoder reducing the data to 64 dimensions
         self.decoder = torch.nn.Sequential(
             torch.nn.Linear(in_features=dims[2], out_features=dims[1]),
             torch.nn.BatchNorm1d(dims[1]),
-            torch.nn.LeakyReLU(0.2),
+            torch.nn.ELU(),
 
             torch.nn.Linear(in_features=dims[1], out_features=dims[0]),
             torch.nn.BatchNorm1d(dims[0]),
-            torch.nn.LeakyReLU(0.2),
+            torch.nn.ELU(),
         )
 
     """ Input:  x: Instance of data to process by the model.
