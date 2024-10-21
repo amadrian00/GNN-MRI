@@ -26,6 +26,13 @@ def get_args():
         help='Size of batches for training (default: 32)'
     )
 
+    parser.add_argument(
+        '-t', '--train',
+        type=bool,
+        default=False,
+        help='Train model (default: False)'
+    )
+
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -64,4 +71,9 @@ if __name__ == '__main__':
 
     brainEncoder = brainEncoder.BrainEncoder(device, dataset.__getitem__(0)[0].shape,'AutoEncoder')
 
-    brainEncoder.fit(train_dataloader, val_dataloader, args.epochs, args.batch_size)
+    if args.train:
+        encoded_train, encoded_validation = brainEncoder.fit_transform(train_dataloader, val_dataloader, args.epochs, args.batch_size)
+    else:
+        encoder = brainEncoder.load_encoder()
+        encoded_train = brainEncoder.transform(train_dataloader, True)
+        encoded_validation = brainEncoder.transform(val_dataloader, True)

@@ -75,7 +75,7 @@ class AE(torch.nn.Module):
         val_losses = []
         best_val = 10
         best_epoch = 0
-        best_decoder_state_dict = None
+        best_encoder_state_dict = None
         for epoch in range(epochs):
             self.train()
             i = 0
@@ -115,13 +115,13 @@ class AE(torch.nn.Module):
 
             if val_losses[-1] < best_val:
                 best_val = val_losses[-1]
-                best_decoder_state_dict = self.decoder.state_dict()
+                best_encoder_state_dict = self.encoder.state_dict()
                 best_epoch = epoch
 
         print(f'Finished training at {datetime.now().strftime("%H:%M:%S")}.\n'
               f'Best epoch {best_epoch}')
 
-        torch.save(best_decoder_state_dict, 'brainEncoder/encoder.pt')
+        torch.save(best_encoder_state_dict, 'brainEncoder/encoder.pt')
         #Plot
         epoch_list = np.arange(0, epochs)
         plt.figure(figsize=(10, 6))
