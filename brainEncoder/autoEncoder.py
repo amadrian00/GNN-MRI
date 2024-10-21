@@ -51,7 +51,14 @@ class AE(torch.nn.Module):
     def encode(self, x):
         return self.encoder(x)
 
-    def weighted_mse_loss(self, y_hat, y, weight):
+    """ Input:  y_hat: Predicted data label.
+                y: Real data label.
+                weights: Weights for each instance.
+        Output: Integer of the loss
+        
+        Function that calculates the weighted MSE loss for the given data."""
+    @staticmethod
+    def weighted_mse_loss(y_hat, y, weight):
         weight = weight.view(-1, 1)
         return (weight * (y_hat - y) ** 2).mean() / torch.sum(weight)
 
@@ -64,7 +71,6 @@ class AE(torch.nn.Module):
     def fit(self, train_loader, val_dataloader, epochs, batch_size):
         print(f"\nStarted training at {datetime.now().strftime("%H:%M:%S")}.")
 
-        #loss_function = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-8)
 
         train_losses = []
@@ -75,6 +81,7 @@ class AE(torch.nn.Module):
         for epoch in range(epochs):
             self.train()
             i = 0
+
             batch_losses = []
             pq = tqdm(train_loader)
             pq.set_description(f"Epoch {epoch}")
@@ -114,9 +121,9 @@ class AE(torch.nn.Module):
                 best_epoch = epoch
 
         print(f'Finished training at {datetime.now().strftime("%H:%M:%S")}.\n'
-              f'Best iteration {best_epoch}')
+              f'Best epoch {best_epoch}')
 
-        torch.save(best_decoder_state_dict, 'encoder.pt')
+        torch.save(best_decoder_state_dict, 'brainEncoder/encoder.pt')
         #Plot
         epoch_list = np.arange(0, epochs)
         plt.figure(figsize=(10, 6))
