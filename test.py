@@ -5,7 +5,10 @@ import os
 import torch
 import argparse
 from torch.utils import data
+from torch.utils.data import DataLoader
+
 from data import prepareDataset
+from clustering import clusterFinder
 from brainEncoder import brainEncoder
 from data.prepareDataset import DallasDataSet
 from sklearn.model_selection import train_test_split
@@ -70,10 +73,50 @@ if __name__ == '__main__':
     test_dataloader = data.DataLoader(test_df, batch_size=len(test_df), shuffle=True)
 
     brainEncoder = brainEncoder.BrainEncoder(device, dataset.__getitem__(0)[0].shape,'AutoEncoder')
-
+    save = True
     if args.train:
-        encoded_train, encoded_validation = brainEncoder.fit_transform(train_dataloader, val_dataloader, args.epochs, args.batch_size)
+        brainEncoder.fit(train_dataloader, val_dataloader, args.epochs, args.batch_size)
     else:
         encoder = brainEncoder.load_encoder()
-        encoded_train = brainEncoder.transform(train_dataloader, True)
-        encoded_validation = brainEncoder.transform(val_dataloader, True)
+
+    train_encoded = brainEncoder.transform(train_dataloader)
+    val_encoded = brainEncoder.transform(val_dataloader)
+    test_encoded = brainEncoder.transform(test_dataloader)
+
+    clustering = clusterFinder.ClusterFinder()
+    clusters = clustering.generate_clusters(train_encoded)
+
+    import matplotlib.pyplot as plt
+    from sklearn.decomposition import PCA
+    import numpy as np
+
+    all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
+    all_encoded = brainEncoder.transform(all_dataloader)
+    clustering = clusterFinder.ClusterFinder()
+    clusters2 = clustering.generate_clusters(all_encoded)
+
+    X = all_encoded
+    y = clusters2
+    alzheimer = np.array([x for _, labels in all_dataloader for x in labels[0].numpy().tolist()])
+    is_alzheimer = alzheimer == 1
+    is_not_alzheimer = ~is_alzheimer
+
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
+
+    plt.figure(figsize=(8, 6))
+
+    plt.scatter(X_pca[is_not_alzheimer, 0], X_pca[is_not_alzheimer, 1], c=y[is_not_alzheimer], cmap='viridis', s=50,
+                alpha=0.7, label="Other")
+
+    plt.scatter(X_pca[is_alzheimer, 0], X_pca[is_alzheimer, 1], marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
+
+    plt.title("PCA projection of 32D vectors with clusters and Alzheimer Label")
+    plt.xlabel("PCA Component 1")
+    plt.ylabel("PCA Component 2")
+
+    plt.colorbar(label="Cluster ID")
+
+    plt.legend()
+
+    plt.show()

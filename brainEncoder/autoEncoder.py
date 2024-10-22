@@ -140,3 +140,4 @@ class AE(torch.nn.Module):
 
         # Show the plot
         plt.show()
+        self.decoder.load_state_dict(best_encoder_state_dict)

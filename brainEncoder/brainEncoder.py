@@ -1,6 +1,7 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
+import numpy
 import torch
 from . import autoEncoder
 
@@ -8,21 +9,23 @@ class BrainEncoder:
     def __init__(self, available_device, in_channels, encoder_name='AutoEncoder'):
         self.autoencoder = self._select_encoder(available_device, in_channels, encoder_name)
         self.autoencoder.to(available_device)
+        self.available_device = available_device
 
-    """ Input:  dataset: Data to generate predictions.
-                save: Boolean that indicates whether to save the features as a file or not.
+    """ Input:  dataloader: Data to generate predictions.
         Output: Array of predictions.
     
         Function that instantiates the whole model and generates the predictions."""
-    def transform(self, dataset, save=False):
-        self.autoencoder.eval()
-        features = self.autoencoder.encode(dataset)
-        print(features)
-        print(features.shape)
+    def transform(self, dataloader):
+        with (torch.no_grad()):
+            self.autoencoder.eval()
+            encoded = []
 
-        if save: features.to_csv("data/brainEncoder/features.csv", index=False)
+            for batch in dataloader:
+                batch_data, _ = batch
+                encoded.append(self.autoencoder.encode(batch_data).cpu())
 
-        return features
+            encoded = numpy.concatenate(encoded, axis=0)
+            return encoded
 
     """ Input:  available_device: String indicating the available device for PyTorch.
                 encoder_name: String indicating selection of encoder layer.
@@ -56,13 +59,15 @@ class BrainEncoder:
         Output: Encoded MRI signal for the train and validation dataloaders.
 
         Function that trains the dataset and encodes the data. """
-    def fit_transform(self, train_loader, val_dataloader, epochs, batch_size, save=False):
+    def fit_transform(self, train_loader, val_dataloader, epochs, batch_size):
         self.fit(train_loader, val_dataloader, epochs, batch_size)
-        return self.transform(train_loader, save), self.transform(val_dataloader, save)
+        return self.transform(train_loader), self.transform(val_dataloader)
 
     """ Input:  -
         Output: Loaded model.
 
         Function that loads the trained model. """
-    def load_encoder(self):
-        return self.autoencoder.encoder.load_state_dict(torch.load('brainEncoder/encoder.pt', weights_only=True))
+    def load_encoder(self, device = None):
+        if device is None: device = self.available_device
+
+        return self.autoencoder.encoder.load_state_dict(torch.load('brainEncoder/encoder.pt', weights_only=True, map_location= device))
