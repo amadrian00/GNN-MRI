@@ -1,6 +1,7 @@
 """
 Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 """
+import sys
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -13,26 +14,42 @@ class AE(torch.nn.Module):
         self.in_channels = in_channels
         self.available_device = available_device
 
-        dims = [self.in_channels[0], 128, 32]
+        dims = [self.in_channels[0], 4056, 1024, 256, 64]
 
         self.encoder = torch.nn.Sequential(
             torch.nn.Linear(in_features=dims[0], out_features=dims[1]),
             torch.nn.BatchNorm1d(dims[1]),
-            torch.nn.ELU(),
+            torch.nn.LeakyReLU(0.2),
 
             torch.nn.Linear(in_features=dims[1], out_features=dims[2]),
             torch.nn.BatchNorm1d(dims[2]),
-            torch.nn.ELU(),
+            torch.nn.LeakyReLU(0.2),
+
+            torch.nn.Linear(in_features=dims[2], out_features=dims[3]),
+            torch.nn.BatchNorm1d(dims[3]),
+            torch.nn.LeakyReLU(0.2),
+
+            torch.nn.Linear(in_features=dims[3], out_features=dims[4]),
+            torch.nn.BatchNorm1d(dims[4]),
+            torch.nn.LeakyReLU(0.2),
         )
 
         self.decoder = torch.nn.Sequential(
+            torch.nn.Linear(in_features=dims[4], out_features=dims[3]),
+            torch.nn.BatchNorm1d(dims[3]),
+            torch.nn.LeakyReLU(0.2),
+
+            torch.nn.Linear(in_features=dims[3], out_features=dims[2]),
+            torch.nn.BatchNorm1d(dims[2]),
+            torch.nn.LeakyReLU(0.2),
+
             torch.nn.Linear(in_features=dims[2], out_features=dims[1]),
             torch.nn.BatchNorm1d(dims[1]),
-            torch.nn.ELU(),
+            torch.nn.LeakyReLU(0.2),
 
             torch.nn.Linear(in_features=dims[1], out_features=dims[0]),
             torch.nn.BatchNorm1d(dims[0]),
-            torch.nn.ELU(),
+            torch.nn.Tanh(),
         )
 
     """ Input:  x: Instance of data to process by the model.
@@ -49,17 +66,6 @@ class AE(torch.nn.Module):
     def encode(self, x):
         return self.encoder(x)
 
-    """ Input:  y_hat: Predicted data label.
-                y: Real data label.
-                weights: Weights for each instance.
-        Output: Integer of the loss
-        
-        Function that calculates the weighted MSE loss for the given data."""
-    @staticmethod
-    def weighted_mse_loss(y_hat, y, weight):
-        weight = weight.view(-1, 1)
-        return (weight * (y_hat - y) ** 2).mean() / torch.sum(weight)
-
     """ Input:  train_loader: Instance of data to train the model.
                 val_dataloader: Instance of data to validate the model.
                 epochs: Integer indicating the number of epochs to train the model.
@@ -68,12 +74,12 @@ class AE(torch.nn.Module):
         Function that trains the model with the given data."""
     def fit(self, train_loader, val_dataloader, epochs, batch_size):
         print(f"\nStarted training at {datetime.now().strftime("%H:%M:%S")}.")
-
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-8)
+        criterion = torch.nn.MSELoss()
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-5, weight_decay=1e-8)
 
         train_losses = []
         val_losses = []
-        best_val = 10
+        best_val = sys.maxsize
         best_epoch = 0
         best_encoder_state_dict = None
         for epoch in range(epochs):
@@ -85,12 +91,11 @@ class AE(torch.nn.Module):
             pq.set_description(f"Epoch {epoch}")
             for batch in pq:
                 batch_data, labels = batch
-                weights = torch.where(labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
 
                 batch_data.to(self.available_device)
                 elements_reconstructed = self(batch_data)
 
-                loss = self.weighted_mse_loss(elements_reconstructed, batch_data, weights) # Calculating the loss function
+                loss = criterion(elements_reconstructed, batch_data)
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -105,12 +110,11 @@ class AE(torch.nn.Module):
             with torch.no_grad():
                 for val_batch in val_dataloader:
                     val_batch_data, val_labels = val_batch
-                    val_weights = torch.where(val_labels[0] == 1, 9.4375, 0.5279).to(self.available_device)
 
                     val_batch_data.to(self.available_device)
                     val_elements_reconstructed = self(val_batch_data)
 
-                    val_loss = self.weighted_mse_loss(val_elements_reconstructed, val_batch_data, val_weights)
+                    val_loss = criterion(val_elements_reconstructed, val_batch_data)
             val_losses.append(val_loss.detach().item())
 
             if val_losses[-1] < best_val:
@@ -129,7 +133,6 @@ class AE(torch.nn.Module):
         plt.plot(epoch_list, val_losses, label='Validation Loss', color='orange', marker='x')
 
         plt.xticks(np.arange(0, epochs+1, max(1,epochs // 10)))
-        plt.ylim(min(train_losses)-0.0005, max(train_losses)+0.0005)
 
         # Label the axes and title
         plt.xlabel('Epochs')
@@ -140,4 +143,4 @@ class AE(torch.nn.Module):
 
         # Show the plot
         plt.show()
-        self.decoder.load_state_dict(best_encoder_state_dict)
+        self.encoder.load_state_dict(best_encoder_state_dict)
