@@ -301,3 +301,40 @@ class DallasDataSet(Dataset):
         Function that returns the length of the dataset."""
     def __len__(self):
         return len(self.dataframe)
+
+class Oasis3(Dataset):
+    def __init__(self, available_device, root_dir='/DataCommon4/fMRI_data/OASIS3/', df=None):
+        self.available_device = available_device
+        if df is None:
+            file = 'cpac_based/GSR/run-01/cc200_AD_751_NC_1047_maxlen_600_minlen_40_M_818_F_980.npz'
+            with np.load(root_dir + file) as data:
+                df_dict = {
+                    'corr': list(data['corr'].reshape(1798, -1)),  # Reshape to 2D: (1798, 200*200)
+                    'time': list(data['time'].reshape(1798, -1)),  # Reshape to 2D: (1798, 200*600)
+                    'gender': data['gender'],
+                    'label': data['label'],
+                    'len': data['len'],
+                    'sid': data['sid'],
+                    'sub_sid': data['sub_sid'],
+                    'race': data['race'],
+                }
+
+                self.dataframe = pd.DataFrame.from_dict(df_dict)
+        else:
+            self.dataframe = df
+
+    """ Input:  idx: Integer indicating the index of the item to get.
+        Output: Time of the dataset.
+
+        Function that returns the item at the given index of the dataset."""
+    def __getitem__(self, idx):
+        elem = torch.tensor(self.dataframe['corr'].iloc[idx], dtype=torch.float32, device=self.available_device)
+        label = self.dataframe['label'].iloc[idx]
+        return elem, label
+
+    """ Input:  
+        Output: Length of the dataset.
+
+        Function that returns the length of the dataset."""
+    def __len__(self):
+        return len(self.dataframe)
