@@ -75,7 +75,7 @@ class AE(torch.nn.Module):
     def fit(self, train_loader, val_dataloader, epochs, batch_size):
         print(f"\nStarted training at {datetime.now().strftime("%H:%M:%S")}.")
         criterion = torch.nn.MSELoss()
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-5, weight_decay=1e-8)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-8)
 
         train_losses = []
         val_losses = []

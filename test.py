@@ -75,9 +75,7 @@ def prepare_oasis_dataset():
     return oasis_dataset, train_dataframe, val_dataframe, test_dataframe
 
 def plot_clusters():
-    all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
     x = brainEncoder.transform(all_dataloader)
-    clustering = clusterFinder.ClusterFinder()
     y = clustering.generate_clusters(x)
 
     alzheimer = np.array([x for _, labels in all_dataloader for x in labels])
@@ -139,4 +137,9 @@ if __name__ == '__main__':
     else:
         encoder = brainEncoder.load_encoder()
 
-    plot_clusters()
+    clustering = clusterFinder.ClusterFinder()
+    all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
+    # plot_clusters()
+    clustering.add_clusters_to_dataframe(dataset.dataframe, brainEncoder.transform(all_dataloader), True)
+
+    print(dataset.dataframe)
