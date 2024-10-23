@@ -84,23 +84,29 @@ def plot_clusters():
     is_alzheimer = alzheimer == 1
     is_not_alzheimer = ~is_alzheimer
 
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=3)
     x_pca = pca.fit_transform(x)
 
-    plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
 
-    plt.scatter(x_pca[is_not_alzheimer, 0], x_pca[is_not_alzheimer, 1], c=y[is_not_alzheimer], cmap='viridis', s=50,
-                alpha=0.7, label="Other")
+    ax.scatter(x_pca[is_not_alzheimer, 0], x_pca[is_not_alzheimer, 1], x_pca[is_not_alzheimer, 2],
+                          c=y[is_not_alzheimer], cmap='viridis', s=50, alpha=0.7, label="Other")
 
-    plt.scatter(x_pca[is_alzheimer, 0], x_pca[is_alzheimer, 1], marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
+    ax.scatter(x_pca[is_alzheimer, 0], x_pca[is_alzheimer, 1], x_pca[is_alzheimer, 2],
+                          marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
 
-    plt.title("PCA projection of 64D vectors with clusters and Alzheimer Label")
-    plt.xlabel("PCA Component 1")
-    plt.ylabel("PCA Component 2")
+    ax.set_title("PCA Projection of 64D Vectors with Clusters and Alzheimer Label")
+    ax.set_xlabel("PCA Component 1")
+    ax.set_ylabel("PCA Component 2")
+    ax.set_zlabel("PCA Component 3")
 
-    plt.colorbar(label="Cluster ID")
+    mappable = plt.cm.ScalarMappable(cmap='viridis')
+    mappable.set_array(y)
+    cbar = plt.colorbar(mappable, ax=ax, pad=0.1)
+    cbar.set_label("Cluster ID")
 
-    plt.legend()
+    ax.legend()
 
     plt.show()
 
