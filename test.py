@@ -4,13 +4,15 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 import os
 import torch
 import argparse
+import numpy as np
 from torch.utils import data
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 from torch.utils.data import DataLoader
-
 from data import prepareDataset
 from clustering import clusterFinder
 from brainEncoder import brainEncoder
-from data.prepareDataset import DallasDataSet
+from data.prepareDataset import DallasDataSet, Oasis3
 from sklearn.model_selection import train_test_split
 
 def get_args():
@@ -38,6 +40,70 @@ def get_args():
 
     return parser.parse_args()
 
+def prepare_dallas_dataset():
+    dallas_dataset = prepareDataset.DallasDataSet(device, root_dir=root_dir_dallas)
+
+    column = 'CESDepression'
+    count_class_0 = len(dallas_dataset.dataframe.loc[dallas_dataset.dataframe[column] == 0])
+    count_class_1 = len(dallas_dataset.dataframe.loc[dallas_dataset.dataframe[column] == 1])
+
+    # Calculate weights for each class
+    weight_for_class_0 = len(dallas_dataset.dataframe) / (count_class_0 * 2)  # Majority class weight
+    weight_for_class_1 = len(dallas_dataset.dataframe) / (count_class_1 * 2)  # Minority class weight
+
+    train_dataframe, temp_dataframe = train_test_split(dallas_dataset.dataframe, test_size=0.2, stratify=dallas_dataset.dataframe['Alzheimer'],
+                                                random_state=24)
+    val_dataframe, test_dataframe = train_test_split(temp_dataframe, test_size=0.5, stratify=temp_dataframe['Alzheimer'], random_state=24)
+
+    train_dataframe = DallasDataSet(device, df=train_dataframe,)
+    val_dataframe = DallasDataSet(device, df=val_dataframe)
+    test_dataframe = DallasDataSet(device, df=test_dataframe)
+
+    return dallas_dataset, train_dataframe, val_dataframe, test_dataframe
+
+def prepare_oasis_dataset():
+    oasis_dataset = prepareDataset.Oasis3(device)
+
+    train_dataframe, temp_dataframe = train_test_split(oasis_dataset.dataframe, test_size=0.2, stratify=oasis_dataset.dataframe['label'],
+                                                random_state=24)
+    val_dataframe, test_dataframe = train_test_split(temp_dataframe, test_size=0.5, stratify=temp_dataframe['label'], random_state=24)
+
+    train_dataframe = Oasis3(device, df=train_dataframe, )
+    val_dataframe = Oasis3(device, df=val_dataframe)
+    test_dataframe = Oasis3(device, df=test_dataframe)
+
+    return oasis_dataset, train_dataframe, val_dataframe, test_dataframe
+
+def plot_clusters():
+    all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
+    x = brainEncoder.transform(all_dataloader)
+    clustering = clusterFinder.ClusterFinder()
+    y = clustering.generate_clusters(x)
+
+    alzheimer = np.array([x for _, labels in all_dataloader for x in labels])
+    is_alzheimer = alzheimer == 1
+    is_not_alzheimer = ~is_alzheimer
+
+    pca = PCA(n_components=2)
+    x_pca = pca.fit_transform(x)
+
+    plt.figure(figsize=(8, 6))
+
+    plt.scatter(x_pca[is_not_alzheimer, 0], x_pca[is_not_alzheimer, 1], c=y[is_not_alzheimer], cmap='viridis', s=50,
+                alpha=0.7, label="Other")
+
+    plt.scatter(x_pca[is_alzheimer, 0], x_pca[is_alzheimer, 1], marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
+
+    plt.title("PCA projection of 64D vectors with clusters and Alzheimer Label")
+    plt.xlabel("PCA Component 1")
+    plt.ylabel("PCA Component 2")
+
+    plt.colorbar(label="Cluster ID")
+
+    plt.legend()
+
+    plt.show()
+
 if __name__ == '__main__':
     args = get_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = "4"
@@ -45,28 +111,16 @@ if __name__ == '__main__':
 
     if device == 'cuda':
         print('Executing on:', torch.cuda.get_device_name())
-        root_dir = os.path.join('/', 'DataCommon4/aayuso')
+        root_dir_dallas = os.path.join('/', 'DataCommon4/aayuso')
+        root_dir_oasis = '/DataCommon4/fMRI_data/OASIS3/'
 
     else:
         print('Executing on: CPU')
-        root_dir = 'data/datasets/'
+        root_dir_dallas = 'data/datasets/'
+        root_dir_oasis = ''
 
-    dataset = prepareDataset.DallasDataSet(device, root_dir=root_dir)
-
-    column = 'CESDepression'
-    count_class_0 = len(dataset.dataframe.loc[dataset.dataframe[column] == 0])
-    count_class_1 = len(dataset.dataframe.loc[dataset.dataframe[column] == 1])
-
-    # Calculate weights for each class
-    weight_for_class_0 = len(dataset.dataframe) / (count_class_0 * 2)  # Majority class weight
-    weight_for_class_1 = len(dataset.dataframe) / (count_class_1 * 2)  # Minority class weight
-
-    train_df, temp_df = train_test_split(dataset.dataframe, test_size=0.2, stratify=dataset.dataframe['Alzheimer'], random_state=24)
-    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df['Alzheimer'], random_state=24)
-
-    train_df = DallasDataSet(device, df=train_df,)
-    val_df = DallasDataSet(device, df=val_df)
-    test_df = DallasDataSet(device, df=test_df)
+    # dataset, train_df, val_df, test_df = prepare_dallas_dataset()
+    dataset, train_df, val_df, test_df = prepare_oasis_dataset()
 
     train_dataloader = data.DataLoader(train_df, batch_size=args.batch_size, shuffle=True)
     val_dataloader = data.DataLoader(val_df, batch_size=len(val_df), shuffle=True)
@@ -79,44 +133,4 @@ if __name__ == '__main__':
     else:
         encoder = brainEncoder.load_encoder()
 
-    train_encoded = brainEncoder.transform(train_dataloader)
-    val_encoded = brainEncoder.transform(val_dataloader)
-    test_encoded = brainEncoder.transform(test_dataloader)
-
-    clustering = clusterFinder.ClusterFinder()
-    clusters = clustering.generate_clusters(train_encoded)
-
-    import matplotlib.pyplot as plt
-    from sklearn.decomposition import PCA
-    import numpy as np
-
-    all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
-    all_encoded = brainEncoder.transform(all_dataloader)
-    clustering = clusterFinder.ClusterFinder()
-    clusters2 = clustering.generate_clusters(all_encoded)
-
-    X = all_encoded
-    y = clusters2
-    alzheimer = np.array([x for _, labels in all_dataloader for x in labels[0].numpy().tolist()])
-    is_alzheimer = alzheimer == 1
-    is_not_alzheimer = ~is_alzheimer
-
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X)
-
-    plt.figure(figsize=(8, 6))
-
-    plt.scatter(X_pca[is_not_alzheimer, 0], X_pca[is_not_alzheimer, 1], c=y[is_not_alzheimer], cmap='viridis', s=50,
-                alpha=0.7, label="Other")
-
-    plt.scatter(X_pca[is_alzheimer, 0], X_pca[is_alzheimer, 1], marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
-
-    plt.title("PCA projection of 32D vectors with clusters and Alzheimer Label")
-    plt.xlabel("PCA Component 1")
-    plt.ylabel("PCA Component 2")
-
-    plt.colorbar(label="Cluster ID")
-
-    plt.legend()
-
-    plt.show()
+    plot_clusters()
