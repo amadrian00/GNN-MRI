@@ -4,10 +4,7 @@ Adrián Ayuso Muñoz 2024-09-09 for the GNN-MRI project.
 import os
 import torch
 import argparse
-import numpy as np
 from torch.utils import data
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 from torch.utils.data import DataLoader
 from data import prepareDataset
 from clustering import clusterFinder
@@ -74,40 +71,6 @@ def prepare_oasis_dataset():
 
     return oasis_dataset, train_dataframe, val_dataframe, test_dataframe
 
-def plot_clusters():
-    x = brainEncoder.transform(all_dataloader)
-    y = clustering.generate_clusters(x)
-
-    alzheimer = np.array([x for _, labels in all_dataloader for x in labels])
-    is_alzheimer = alzheimer == 1
-    is_not_alzheimer = ~is_alzheimer
-
-    pca = PCA(n_components=3)
-    x_pca = pca.fit_transform(x)
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.scatter(x_pca[is_not_alzheimer, 0], x_pca[is_not_alzheimer, 1], x_pca[is_not_alzheimer, 2],
-                          c=y[is_not_alzheimer], cmap='viridis', s=50, alpha=0.7, label="Other")
-
-    ax.scatter(x_pca[is_alzheimer, 0], x_pca[is_alzheimer, 1], x_pca[is_alzheimer, 2],
-                          marker='x', c=y[is_alzheimer], label="Alzheimer", s=100)
-
-    ax.set_title("PCA Projection of 64D Vectors with Clusters and Alzheimer Label")
-    ax.set_xlabel("PCA Component 1")
-    ax.set_ylabel("PCA Component 2")
-    ax.set_zlabel("PCA Component 3")
-
-    mappable = plt.cm.ScalarMappable(cmap='viridis')
-    mappable.set_array(y)
-    cbar = plt.colorbar(mappable, ax=ax, pad=0.1)
-    cbar.set_label("Cluster ID")
-
-    ax.legend()
-
-    plt.show()
-
 if __name__ == '__main__':
     args = get_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = "4"
@@ -139,7 +102,6 @@ if __name__ == '__main__':
 
     clustering = clusterFinder.ClusterFinder()
     all_dataloader = DataLoader(dataset, batch_size=args.batch_size)
-    # plot_clusters()
-    clustering.add_clusters_to_dataframe(dataset.dataframe, brainEncoder.transform(all_dataloader), True)
 
-    print(dataset.dataframe)
+    # clustering.plot_clusters(brainEncoder.transform(all_dataloader), all_dataloader)
+    clustering.add_clusters_to_dataframe(dataset.dataframe, brainEncoder.transform(all_dataloader))
